@@ -8,9 +8,7 @@
  */
 
 import type { MapContainer } from '@/components';
-import type { AppContext } from '@/app/app-context';
-import { getCountryNameByCode, getCountryBbox, getAllCountryCodes } from '@/services/country-geometry';
-import { t } from '@/services/i18n';
+import { getCountryNameByCode, getAllCountryCodes } from '@/services/country-geometry';
 import { toFlagEmoji } from '@/utils/country-flag';
 
 export interface CountryDashboardConfig {
@@ -20,10 +18,8 @@ export interface CountryDashboardConfig {
 
 export class CountryDashboard {
   private container: HTMLElement;
-  private map: MapContainer | null = null;
   private currentCountryCode: string = 'ID'; // Default to Indonesia
   private favoriteCountries: Set<string> = new Set();
-  private countrySelector: HTMLElement | null = null;
   private searchInput: HTMLInputElement | null = null;
   private suggestionsDropdown: HTMLElement | null = null;
   private allCountries: Array<{ code: string; name: string }> = [];
@@ -36,6 +32,7 @@ export class CountryDashboard {
       this.favoriteCountries = new Set(config.favoriteCountries);
     }
     this.initializeCountryList();
+    this.loadFavoritesFromStorage();
   }
 
   private initializeCountryList(): void {
@@ -172,7 +169,9 @@ export class CountryDashboard {
         }
       });
 
-      this.suggestionsDropdown.appendChild(item);
+      if (this.suggestionsDropdown) {
+        this.suggestionsDropdown.appendChild(item);
+      }
     });
   }
 
@@ -234,13 +233,13 @@ export class CountryDashboard {
     return { code: this.currentCountryCode, name };
   }
 
-  public setMap(map: MapContainer): void {
-    this.map = map;
+  public setMap(_map: MapContainer): void {
+    // Map is used by the page controller for fitting and highlighting
+    // This method is kept for API compatibility
   }
 
   public destroy(): void {
     this.container.innerHTML = '';
-    this.map = null;
     this.onCountryChange = null;
   }
 }
