@@ -57,6 +57,7 @@ import { fetchBootstrapData, getBootstrapHydrationState, markBootstrapAsLive, ty
 import { describeFreshness } from '@/services/persistent-cache';
 import { DesktopUpdater } from '@/app/desktop-updater';
 import { CountryIntelManager } from '@/app/country-intel';
+import { CountryDashboardPage } from '@/pages/country-dashboard';
 import { SearchManager } from '@/app/search-manager';
 import { RefreshScheduler } from '@/app/refresh-scheduler';
 import { PanelLayoutManager } from '@/app/panel-layout';
@@ -92,6 +93,8 @@ export class App {
   private countryIntel: CountryIntelManager;
   private refreshScheduler: RefreshScheduler;
   private desktopUpdater: DesktopUpdater;
+  private countryDashboardPage: CountryDashboardPage | null = null;
+  private isDashboardMode = false;
 
   private modules: { destroy(): void }[] = [];
   private unsubAiFlow: (() => void) | null = null;
@@ -808,9 +811,19 @@ export class App {
     const resolvedRegion = await resolveUserRegion();
     this.state.resolvedLocation = resolvedRegion;
 
+    // Check for dashboard mode before layout
+    const url = new URL(window.location.href);
+    const dashboardParam = url.searchParams.get('dashboard');
+    this.isDashboardMode = dashboardParam === 'country';
+
     // Phase 1: Layout (creates map + panels — they'll find hydrated data)
-    this.panelLayout.init();
-    showProBanner(this.state.container);
+    if (!this.isDashboardMode) {
+      this.panelLayout.init();
+      showProBanner(this.state.container);
+    } else {
+      // Initialize country dashboard instead of normal layout
+      this.initializeCountryDashboard();
+    }
     this.updateConnectivityUi();
     window.addEventListener('online', this.handleConnectivityChange);
     window.addEventListener('offline', this.handleConnectivityChange);
@@ -888,7 +901,9 @@ export class App {
 
     // Start deep link handling early — its retry loop polls hasSufficientData()
     // independently, so it must not be gated behind loadAllData() which can hang.
-    this.handleDeepLinks();
+    if (!this.isDashboardMode) {
+      this.handleDeepLinks();
+    }
 
     // Phase 6: Data loading
     this.dataLoader.syncDataFreshnessWithLayers();
@@ -933,7 +948,9 @@ export class App {
     }
 
     // Phase 7: Refresh scheduling
-    this.setupRefreshIntervals();
+    if (!this.isDashboardMode) {
+      this.setupRefreshIntervals();
+    }
     this.eventHandlers.setupSnapshotSaving();
     cleanOldSnapshots().catch((e) => console.warn('[Storage] Snapshot cleanup failed:', e));
 
@@ -1009,6 +1026,12 @@ export class App {
       this.visiblePanelPrimeRaf = null;
     }
 
+    // Destroy dashboard if active
+    if (this.countryDashboardPage) {
+      this.countryDashboardPage.destroy();
+      this.countryDashboardPage = null;
+    }
+
     // Destroy all modules in reverse order
     for (let i = this.modules.length - 1; i >= 0; i--) {
       this.modules[i]!.destroy();
@@ -1023,6 +1046,25 @@ export class App {
     this.cachedModeBannerEl = null;
     this.state.map?.destroy();
     disconnectAisStream();
+  }
+
+  private initializeCountryDashboard(): void {
+    // Create country dashboard page
+    const dashboardContainer = document.createElement('div');
+    dashboardContainer.id = 'country-dashboard';
+    dashboardContainer.style.cssText = 'width: 100%; height: 100vh; overflow: hidden;';
+    this.state.container.appendChild(dashboardContainer);
+
+    this.countryDashboardPage = new CountryDashboardPage(
+      dashboardContainer,
+      this.state,
+      this.countryIntel
+    );
+
+    // Get country from URL or use default
+    const url = new URL(window.location.href);
+    const countryParam = url.searchParams.get('country') || 'ID';
+    this.countryDashboardPage.render(countryParam);
   }
 
   private handleDeepLinks(): void {
