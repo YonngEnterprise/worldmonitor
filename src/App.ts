@@ -1049,10 +1049,14 @@ export class App {
   }
 
   private initializeCountryDashboard(): void {
+    // Clear the container completely
+    this.state.container.innerHTML = '';
+    this.state.container.style.cssText = 'display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0a0a0a;';
+
     // Create country dashboard page
     const dashboardContainer = document.createElement('div');
     dashboardContainer.id = 'country-dashboard';
-    dashboardContainer.style.cssText = 'width: 100%; height: 100vh; overflow: hidden;';
+    dashboardContainer.style.cssText = 'display: flex; flex-direction: column; flex: 1; width: 100%; overflow: hidden;';
     this.state.container.appendChild(dashboardContainer);
 
     this.countryDashboardPage = new CountryDashboardPage(
