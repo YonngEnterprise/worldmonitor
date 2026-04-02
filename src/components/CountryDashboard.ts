@@ -3,60 +3,14 @@
  * Provides a searchable country selector with favorites and map/panel integration
  */
 
-// Country list - used for country selector
-const COUNTRIES = [
-  { code: 'US', name: 'United States' },
-  { code: 'CN', name: 'China' },
-  { code: 'IN', name: 'India' },
-  { code: 'BR', name: 'Brazil' },
-  { code: 'RU', name: 'Russia' },
-  { code: 'ID', name: 'Indonesia' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'FR', name: 'France' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'MX', name: 'Mexico' },
-  { code: 'KR', name: 'South Korea' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'ZA', name: 'South Africa' },
-  { code: 'NG', name: 'Nigeria' },
-  { code: 'EG', name: 'Egypt' },
-  { code: 'SA', name: 'Saudi Arabia' },
-  { code: 'AE', name: 'United Arab Emirates' },
-  { code: 'IL', name: 'Israel' },
-  { code: 'IR', name: 'Iran' },
-  { code: 'TH', name: 'Thailand' },
-  { code: 'VN', name: 'Vietnam' },
-  { code: 'PH', name: 'Philippines' },
-  { code: 'MY', name: 'Malaysia' },
-  { code: 'SG', name: 'Singapore' },
-  { code: 'PK', name: 'Pakistan' },
-  { code: 'BD', name: 'Bangladesh' },
-  { code: 'TR', name: 'Turkey' },
-  { code: 'GR', name: 'Greece' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'CL', name: 'Chile' },
-  { code: 'AR', name: 'Argentina' },
-  { code: 'CO', name: 'Colombia' },
-  { code: 'PE', name: 'Peru' },
-];
-
 export class CountryDashboard {
   private container: HTMLElement;
-  private _favorites: Set<string>;
-  private _countryChangeHandler: ((code: string, name: string) => void) | null = null;
   private panelsContainer: HTMLElement | null = null;
-  private _sidebarOpen: boolean = true;
   private isMobile: boolean = false;
 
-  constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
+  constructor(container: HTMLElement, _options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
-    this._favorites = new Set(options.favoriteCountries);
     this.isMobile = window.innerWidth < 768;
-    this._sidebarOpen = !this.isMobile; // Sidebar closed by default on mobile
   }
 
   public render(): void {
@@ -94,13 +48,12 @@ export class CountryDashboard {
     this.panelsContainer = this.container.querySelector('[style*="flex: 1; overflow-y: auto"]') as HTMLElement;
   }
 
-  public setCountryChangeHandler(handler: (code: string, name: string) => void): void {
-    this._countryChangeHandler = handler;
+  public setCountryChangeHandler(_handler: (code: string, name: string) => void): void {
+    // Handler will be used for country selection
   }
 
   public setMap(_map: any): void {
-    // Map will be set here
-    // _map parameter used for future map integration
+    // Map will be set here for future integration
   }
 
   public getPanelsContainer(): HTMLElement | null {

@@ -19,7 +19,7 @@ export class CountryDashboardPage {
   private mapContainer: HTMLElement | null = null;
   private maplibreMap: maplibregl.Map | null = null;
   private deckOverlay: MapboxOverlay | null = null;
-  private _currentCountryCode: string = 'ID';
+  // Current country code is tracked via URL parameters
   private currentCountryGeoJson: any = null;
 
   constructor(container: HTMLElement, _ctx: AppContext, _countryIntel: CountryIntelManager) {
@@ -29,7 +29,7 @@ export class CountryDashboardPage {
   public render(defaultCountry: string = 'ID'): void {
     console.log('CountryDashboardPage.render() called with country:', defaultCountry);
     this.container.innerHTML = '';
-    this._currentCountryCode = defaultCountry;
+    // Country code tracked via URL
     
     try {
       this.dashboard = new CountryDashboard(this.container, {
@@ -120,7 +120,7 @@ export class CountryDashboardPage {
     url.searchParams.set('country', code);
     window.history.replaceState({}, '', url.toString());
 
-    this._currentCountryCode = code;
+    // Country code updated in URL
 
     // Fit map to country with bounds
     this.fitMapToCountry(code);
@@ -374,9 +374,9 @@ export class CountryDashboardPage {
     }
   }
 
-  private getFlagEmoji(_code: string): string {
+  private getFlagEmoji(code: string): string {
     // Convert country code to flag emoji
-    const codePoints = _code
+    const codePoints = code
       .toUpperCase()
       .split('')
       .map(char => 127397 + char.charCodeAt(0));
