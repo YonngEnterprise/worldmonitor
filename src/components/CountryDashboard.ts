@@ -436,12 +436,20 @@ export class CountryDashboard {
   }
 
   private showSuggestions(): void {
+    // Ensure we have a reference to the dropdown
+    if (!this.suggestionsDropdown) {
+      this.suggestionsDropdown = this.container.querySelector('.country-suggestions-dropdown') as HTMLElement;
+    }
     if (this.suggestionsDropdown) {
       this.suggestionsDropdown.classList.remove('hidden');
     }
   }
 
   private hideSuggestions(): void {
+    // Ensure we have a reference to the dropdown
+    if (!this.suggestionsDropdown) {
+      this.suggestionsDropdown = this.container.querySelector('.country-suggestions-dropdown') as HTMLElement;
+    }
     if (this.suggestionsDropdown) {
       this.suggestionsDropdown.classList.add('hidden');
     }
