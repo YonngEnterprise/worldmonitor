@@ -241,7 +241,7 @@ export class CountryDashboardPage {
     });
   }
 
-  private async fetchCountryData(code: string): Promise<any> {
+  private async fetchCountryData(_code: string): Promise<any> {
     try {
       // Fetch country intelligence data
       const data: any = {};
