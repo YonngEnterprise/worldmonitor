@@ -75,6 +75,7 @@ export class CountryDashboard {
   }
 
   public render(): void {
+    console.log('CountryDashboard.render() called');
     this.container.innerHTML = '';
     this.container.style.cssText = `
       width: 100%;
@@ -85,10 +86,12 @@ export class CountryDashboard {
       color: #e5e5e5;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
+    console.log('Container cleared and styled');
 
     // Create header
     const header = this.createHeader();
     this.container.appendChild(header);
+    console.log('Header created and appended');
 
     // Create main content area
     const mainContent = document.createElement('div');
@@ -148,9 +151,12 @@ export class CountryDashboard {
 
     mainContent.appendChild(mainArea);
     this.container.appendChild(mainContent);
+    console.log('Main content created and appended');
+    console.log('Dashboard render complete');
   }
 
   private createHeader(): HTMLElement {
+    console.log('Creating header...');
     const header = document.createElement('div');
     header.style.cssText = `
       display: flex;
@@ -179,6 +185,7 @@ export class CountryDashboard {
   }
 
   private createSidebar(): HTMLElement {
+    console.log('Creating sidebar...');
     const sidebar = document.createElement('div');
     sidebar.style.cssText = `
       width: 280px;
