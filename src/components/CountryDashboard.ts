@@ -60,9 +60,9 @@ const COUNTRIES = [
 
 export class CountryDashboard {
   private container: HTMLElement;
-  private options: { defaultCountry: string; favoriteCountries: string[] };
+  private _options: { defaultCountry: string; favoriteCountries: string[] };
   private favorites: Set<string>;
-  private map: any = null;
+  private _map: any = null;
   private countryChangeHandler: ((code: string, name: string) => void) | null = null;
   private panelsContainer: HTMLElement | null = null;
   private sidebarOpen: boolean = true;
@@ -70,7 +70,7 @@ export class CountryDashboard {
 
   constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
-    this.options = options;
+    this._options = options;
     this.favorites = new Set(options.favoriteCountries);
     this.isMobile = window.innerWidth < 768;
     this.sidebarOpen = !this.isMobile; // Sidebar closed by default on mobile
@@ -321,7 +321,7 @@ export class CountryDashboard {
     buttons.forEach(btn => {
       const text = btn.textContent?.toLowerCase() || '';
       const matches = text.includes(query);
-      btn.style.display = matches ? 'flex' : 'none';
+      (btn as HTMLElement).style.display = matches ? 'flex' : 'none';
     });
   }
 
@@ -375,7 +375,7 @@ export class CountryDashboard {
   }
 
   public setMap(map: any): void {
-    this.map = map;
+    this._map = map;
   }
 
   public getPanelsContainer(): HTMLElement | null {
