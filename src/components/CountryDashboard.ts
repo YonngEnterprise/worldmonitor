@@ -6,11 +6,9 @@
 export class CountryDashboard {
   private container: HTMLElement;
   private panelsContainer: HTMLElement | null = null;
-  private isMobile: boolean = false;
 
   constructor(container: HTMLElement, _options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
-    this.isMobile = window.innerWidth < 768;
   }
 
   public render(): void {

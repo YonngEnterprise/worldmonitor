@@ -374,9 +374,9 @@ export class CountryDashboardPage {
     }
   }
 
-  private getFlagEmoji(code: string): string {
+  private getFlagEmoji(_code: string): string {
     // Convert country code to flag emoji
-    const codePoints = code
+    const codePoints = _code
       .toUpperCase()
       .split('')
       .map(char => 127397 + char.charCodeAt(0));
