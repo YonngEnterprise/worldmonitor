@@ -1,208 +1,157 @@
 /**
- * CountryDashboard - Country-specific dashboard page
- * Provides a focused view of a single country with:
- * - Country-scoped map with nearby infrastructure
- * - Country selector (searchable dropdown + favorites)
- * - Country brief panel
+ * Country Dashboard Component
+ * Provides a country-specific intelligence dashboard with searchable country list
  */
 
-export interface CountryDashboardConfig {
-  defaultCountry?: string;
-  favoriteCountries?: string[];
-}
-
-// Hardcoded list of countries
+// List of countries with codes
 const COUNTRIES = [
-  { code: 'ID', name: 'Indonesia' },
   { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'JP', name: 'Japan' },
   { code: 'CN', name: 'China' },
   { code: 'IN', name: 'India' },
   { code: 'BR', name: 'Brazil' },
   { code: 'RU', name: 'Russia' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'FR', name: 'France' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'AU', name: 'Australia' },
+  { code: 'ID', name: 'Indonesia' },
   { code: 'MX', name: 'Mexico' },
   { code: 'KR', name: 'South Korea' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'IT', name: 'Italy' },
   { code: 'ES', name: 'Spain' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'NO', name: 'Norway' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'FI', name: 'Finland' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'UA', name: 'Ukraine' },
-  { code: 'TR', name: 'Turkey' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'NG', name: 'Nigeria' },
+  { code: 'EG', name: 'Egypt' },
   { code: 'SA', name: 'Saudi Arabia' },
   { code: 'AE', name: 'United Arab Emirates' },
   { code: 'IL', name: 'Israel' },
   { code: 'IR', name: 'Iran' },
   { code: 'IQ', name: 'Iraq' },
   { code: 'SY', name: 'Syria' },
-  { code: 'EG', name: 'Egypt' },
-  { code: 'ZA', name: 'South Africa' },
-  { code: 'NG', name: 'Nigeria' },
-  { code: 'KE', name: 'Kenya' },
+  { code: 'UA', name: 'Ukraine' },
+  { code: 'PK', name: 'Pakistan' },
+  { code: 'BD', name: 'Bangladesh' },
   { code: 'TH', name: 'Thailand' },
   { code: 'VN', name: 'Vietnam' },
   { code: 'PH', name: 'Philippines' },
-  { code: 'SG', name: 'Singapore' },
   { code: 'MY', name: 'Malaysia' },
-  { code: 'PK', name: 'Pakistan' },
-  { code: 'BD', name: 'Bangladesh' },
-  { code: 'AR', name: 'Argentina' },
-  { code: 'CL', name: 'Chile' },
-  { code: 'CO', name: 'Colombia' },
-  { code: 'PE', name: 'Peru' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'TW', name: 'Taiwan' },
   { code: 'NZ', name: 'New Zealand' },
-  { code: 'GR', name: 'Greece' },
-  { code: 'PT', name: 'Portugal' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'NL', name: 'Netherlands' },
   { code: 'BE', name: 'Belgium' },
   { code: 'AT', name: 'Austria' },
+  { code: 'PL', name: 'Poland' },
   { code: 'CZ', name: 'Czech Republic' },
-  { code: 'HU', name: 'Hungary' },
-  { code: 'RO', name: 'Romania' },
-  { code: 'BG', name: 'Bulgaria' },
-  { code: 'HR', name: 'Croatia' },
-  { code: 'RS', name: 'Serbia' },
-  { code: 'GE', name: 'Georgia' },
-  { code: 'KZ', name: 'Kazakhstan' },
-  { code: 'UZ', name: 'Uzbekistan' },
-  { code: 'AF', name: 'Afghanistan' },
-  { code: 'NP', name: 'Nepal' },
-  { code: 'LK', name: 'Sri Lanka' },
-  { code: 'MM', name: 'Myanmar' },
-  { code: 'LA', name: 'Laos' },
-  { code: 'KH', name: 'Cambodia' },
-  { code: 'BN', name: 'Brunei' },
-  { code: 'TL', name: 'Timor-Leste' },
-  { code: 'HK', name: 'Hong Kong' },
-  { code: 'TW', name: 'Taiwan' },
-  { code: 'MO', name: 'Macau' },
-  { code: 'MN', name: 'Mongolia' },
-  { code: 'KP', name: 'North Korea' },
-  { code: 'CU', name: 'Cuba' },
-  { code: 'VE', name: 'Venezuela' },
-  { code: 'EC', name: 'Ecuador' },
-  { code: 'BO', name: 'Bolivia' },
-  { code: 'PY', name: 'Paraguay' },
-  { code: 'UY', name: 'Uruguay' },
-  { code: 'CR', name: 'Costa Rica' },
-  { code: 'PA', name: 'Panama' },
-  { code: 'JM', name: 'Jamaica' },
-  { code: 'DO', name: 'Dominican Republic' },
-  { code: 'HT', name: 'Haiti' },
-  { code: 'TT', name: 'Trinidad and Tobago' },
-  { code: 'BS', name: 'Bahamas' },
-  { code: 'BB', name: 'Barbados' },
-  { code: 'BZ', name: 'Belize' },
-  { code: 'SV', name: 'El Salvador' },
-  { code: 'GT', name: 'Guatemala' },
-  { code: 'HN', name: 'Honduras' },
-  { code: 'NI', name: 'Nicaragua' },
-  { code: 'MA', name: 'Morocco' },
-  { code: 'DZ', name: 'Algeria' },
-  { code: 'TN', name: 'Tunisia' },
-  { code: 'LY', name: 'Libya' },
-  { code: 'SD', name: 'Sudan' },
-  { code: 'ET', name: 'Ethiopia' },
-  { code: 'SO', name: 'Somalia' },
-  { code: 'DJ', name: 'Djibouti' },
-  { code: 'ER', name: 'Eritrea' },
-  { code: 'UG', name: 'Uganda' },
-  { code: 'TZ', name: 'Tanzania' },
-  { code: 'MW', name: 'Malawi' },
-  { code: 'ZM', name: 'Zambia' },
-  { code: 'ZW', name: 'Zimbabwe' },
-  { code: 'BW', name: 'Botswana' },
-  { code: 'NA', name: 'Namibia' },
-  { code: 'AO', name: 'Angola' },
-  { code: 'MZ', name: 'Mozambique' },
-  { code: 'MG', name: 'Madagascar' },
-  { code: 'MU', name: 'Mauritius' },
-  { code: 'SC', name: 'Seychelles' },
-  { code: 'CM', name: 'Cameroon' },
-  { code: 'GA', name: 'Gabon' },
-  { code: 'CG', name: 'Congo' },
-  { code: 'CD', name: 'Democratic Republic of Congo' },
-  { code: 'GH', name: 'Ghana' },
-  { code: 'CI', name: 'Ivory Coast' },
-  { code: 'SN', name: 'Senegal' },
-  { code: 'ML', name: 'Mali' },
-  { code: 'BF', name: 'Burkina Faso' },
-  { code: 'NE', name: 'Niger' },
-  { code: 'TD', name: 'Chad' },
-  { code: 'CF', name: 'Central African Republic' },
-  { code: 'LR', name: 'Liberia' },
-  { code: 'SL', name: 'Sierra Leone' },
-  { code: 'GN', name: 'Guinea' },
-  { code: 'GW', name: 'Guinea-Bissau' },
-  { code: 'CV', name: 'Cape Verde' },
-  { code: 'GM', name: 'Gambia' },
-  { code: 'BJ', name: 'Benin' },
-  { code: 'TG', name: 'Togo' },
-  { code: 'LS', name: 'Lesotho' },
-  { code: 'SZ', name: 'Eswatini' },
-  { code: 'MR', name: 'Mauritania' },
-  { code: 'KM', name: 'Comoros' },
-  { code: 'QA', name: 'Qatar' },
-  { code: 'BH', name: 'Bahrain' },
-  { code: 'KW', name: 'Kuwait' },
-  { code: 'OM', name: 'Oman' },
-  { code: 'YE', name: 'Yemen' },
-  { code: 'JO', name: 'Jordan' },
-  { code: 'LB', name: 'Lebanon' },
-  { code: 'PS', name: 'Palestine' },
-  { code: 'BT', name: 'Bhutan' },
-  { code: 'MV', name: 'Maldives' },
-  { code: 'IE', name: 'Ireland' },
-  { code: 'IS', name: 'Iceland' },
-  { code: 'LT', name: 'Lithuania' },
-  { code: 'LV', name: 'Latvia' },
-  { code: 'EE', name: 'Estonia' },
-  { code: 'BY', name: 'Belarus' },
-  { code: 'MD', name: 'Moldova' },
-  { code: 'AM', name: 'Armenia' },
-  { code: 'AZ', name: 'Azerbaijan' },
-].sort((a, b) => a.name.localeCompare(b.name));
+  { code: 'TR', name: 'Turkey' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'CL', name: 'Chile' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'CO', name: 'Colombia' },
+  { code: 'PE', name: 'Peru' },
+];
 
 export class CountryDashboard {
   private container: HTMLElement;
-  private currentCountryCode: string = 'ID';
-  private favoriteCountries: Set<string> = new Set();
-  private onCountryChange: ((code: string, name: string) => void) | null = null;
-  private mapContainer: HTMLElement | null = null;
-  private panelsContainer: HTMLElement | null = null;
+  private options: { defaultCountry: string; favoriteCountries: string[] };
+  private favorites: Set<string>;
+  private map: any = null;
+  private countryChangeHandler: ((code: string, name: string) => void) | null = null;
   private searchInput: HTMLInputElement | null = null;
-  private dropdownList: HTMLElement | null = null;
+  private countryList: HTMLElement | null = null;
+  private panelsContainer: HTMLElement | null = null;
 
-  constructor(container: HTMLElement, config?: CountryDashboardConfig) {
+  constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
-    this.currentCountryCode = config?.defaultCountry || 'ID';
-    if (config?.favoriteCountries) {
-      this.favoriteCountries = new Set(config.favoriteCountries);
-    }
-    this.loadFavoritesFromStorage();
+    this.options = options;
+    this.favorites = new Set(options.favoriteCountries);
   }
 
   public render(): void {
     this.container.innerHTML = '';
-    this.container.style.cssText = 'display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; background: #0a0a0a;';
-    
-    this.createHeader();
-    this.createMainContent();
-    this.attachEventListeners();
-    this.updateCountryList('');
+    this.container.style.cssText = `
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+
+    // Create header
+    const header = this.createHeader();
+    this.container.appendChild(header);
+
+    // Create main content area
+    const mainContent = document.createElement('div');
+    mainContent.style.cssText = `
+      flex: 1;
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      overflow: hidden;
+    `;
+
+    // Create sidebar with country list
+    const sidebar = this.createSidebar();
+    mainContent.appendChild(sidebar);
+
+    // Create main area (map + panels)
+    const mainArea = document.createElement('div');
+    mainArea.style.cssText = `
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    `;
+
+    // Create map container
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'country-dashboard-map';
+    mapContainer.style.cssText = `
+      flex: 0 0 40%;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 14px;
+    `;
+    mapContainer.textContent = 'Map will be rendered here';
+    mainArea.appendChild(mapContainer);
+
+    // Create panels container
+    this.panelsContainer = document.createElement('div');
+    this.panelsContainer.id = 'country-dashboard-panels';
+    this.panelsContainer.style.cssText = `
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 8px;
+    `;
+    this.panelsContainer.textContent = 'Select a country to view intelligence panels';
+    mainArea.appendChild(this.panelsContainer);
+
+    mainContent.appendChild(mainArea);
+    this.container.appendChild(mainContent);
   }
 
-  private createHeader(): void {
+  private createHeader(): HTMLElement {
     const header = document.createElement('div');
-    header.className = 'country-dashboard-header';
     header.style.cssText = `
       display: flex;
       align-items: center;
@@ -211,16 +160,11 @@ export class CountryDashboard {
       padding: 0 16px;
       background: #141414;
       border-bottom: 1px solid #2a2a2a;
-      gap: 16px;
       flex-shrink: 0;
       z-index: 100;
-      width: 100%;
     `;
 
-    const titleDiv = document.createElement('div');
-    titleDiv.style.cssText = 'flex: 1;';
     const title = document.createElement('h1');
-    title.textContent = 'Country Dashboard';
     title.style.cssText = `
       margin: 0;
       font-size: 18px;
@@ -228,12 +172,23 @@ export class CountryDashboard {
       color: #e5e5e5;
       letter-spacing: -0.5px;
     `;
-    titleDiv.appendChild(title);
-    header.appendChild(titleDiv);
+    title.textContent = 'Country Dashboard';
+    header.appendChild(title);
 
-    const selectorDiv = document.createElement('div');
-    selectorDiv.style.cssText = 'position: relative; width: 280px; z-index: 10000;';
+    return header;
+  }
 
+  private createSidebar(): HTMLElement {
+    const sidebar = document.createElement('div');
+    sidebar.style.cssText = `
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    `;
+
+    // Search input
     this.searchInput = document.createElement('input');
     this.searchInput.type = 'text';
     this.searchInput.placeholder = 'Search countries...';
@@ -247,201 +202,192 @@ export class CountryDashboard {
       color: #e5e5e5;
       font-size: 13px;
       font-family: inherit;
-      transition: all 0.2s ease;
       outline: none;
       box-sizing: border-box;
     `;
 
-    this.dropdownList = document.createElement('div');
-    this.dropdownList.style.cssText = `
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
+    this.searchInput.addEventListener('input', () => this.filterCountries());
+    this.searchInput.addEventListener('focus', () => this.showCountryList());
+    sidebar.appendChild(this.searchInput);
+
+    // Favorites section
+    const favoritesLabel = document.createElement('div');
+    favoritesLabel.style.cssText = `
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 4px;
       margin-top: 4px;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 4px;
-      max-height: 400px;
-      overflow-y: auto;
-      z-index: 1000;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      display: block;
     `;
+    favoritesLabel.textContent = 'Favorites';
+    sidebar.appendChild(favoritesLabel);
 
-    selectorDiv.appendChild(this.searchInput);
-    selectorDiv.appendChild(this.dropdownList);
-    header.appendChild(selectorDiv);
-
-    this.container.appendChild(header);
-  }
-
-  private createMainContent(): void {
-    const main = document.createElement('div');
-    main.style.cssText = 'display: flex; flex-direction: column; flex: 1; width: 100%; overflow: hidden;';
-
-    this.mapContainer = document.createElement('div');
-    this.mapContainer.id = 'country-dashboard-map';
-    this.mapContainer.style.cssText = `
-      height: 50vh;
-      flex-shrink: 0;
-      width: 100%;
-      overflow: hidden;
-      background: #020a08;
+    // Favorites list
+    const favoritesList = document.createElement('div');
+    favoritesList.style.cssText = `
       display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-      font-size: 14px;
-    `;
-    this.mapContainer.textContent = 'Map will be rendered here';
-    main.appendChild(this.mapContainer);
-
-    this.panelsContainer = document.createElement('div');
-    this.panelsContainer.style.cssText = `
-      flex: 1;
-      overflow-y: auto;
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      flex-direction: column;
       gap: 4px;
-      padding: 4px;
-      align-content: start;
+      max-height: 120px;
+      overflow-y: auto;
     `;
-    this.panelsContainer.innerHTML = '<div style="grid-column: 1 / -1; padding: 16px; color: #999; text-align: center;">Select a country to view intelligence panels</div>';
-    main.appendChild(this.panelsContainer);
 
-    this.container.appendChild(main);
-  }
-
-  private attachEventListeners(): void {
-    if (!this.searchInput || !this.dropdownList) return;
-
-    this.searchInput.addEventListener('input', (e) => {
-      const query = (e.target as HTMLInputElement).value;
-      this.updateCountryList(query);
-    });
-
-    this.searchInput.addEventListener('focus', () => {
-      if (this.dropdownList) {
-        this.dropdownList.style.display = 'block';
+    this.favorites.forEach(code => {
+      const country = COUNTRIES.find(c => c.code === code);
+      if (country) {
+        const btn = this.createCountryButton(country, true);
+        favoritesList.appendChild(btn);
       }
     });
 
-    this.searchInput.addEventListener('blur', () => {
-      setTimeout(() => {
-        if (this.dropdownList) {
-          this.dropdownList.style.display = 'none';
-        }
-      }, 200);
-    });
-  }
-
-  private updateCountryList(query: string): void {
-    if (!this.dropdownList) return;
-
-    const filtered = query.trim().length === 0 
-      ? COUNTRIES.slice(0, 20)
-      : COUNTRIES.filter(c => 
-          c.name.toLowerCase().includes(query.toLowerCase()) ||
-          c.code.toLowerCase().includes(query.toLowerCase())
-        );
-
-    this.dropdownList.innerHTML = '';
-
-    if (filtered.length === 0) {
-      const noResults = document.createElement('div');
-      noResults.style.cssText = 'padding: 12px; color: #666; text-align: center; font-size: 13px;';
-      noResults.textContent = 'No countries found';
-      this.dropdownList.appendChild(noResults);
-      return;
+    if (this.favorites.size === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = `
+        font-size: 12px;
+        color: #666;
+        padding: 8px 4px;
+      `;
+      empty.textContent = 'No favorites yet';
+      favoritesList.appendChild(empty);
     }
 
-    filtered.forEach(country => {
-      const item = document.createElement('div');
-      item.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        cursor: pointer;
-        transition: background-color 0.15s ease;
-        border-bottom: 1px solid #0a0a0a;
-      `;
+    sidebar.appendChild(favoritesList);
 
-      if (country.code === this.currentCountryCode) {
-        item.style.background = '#0f5040';
-      }
+    // All countries section
+    const allLabel = document.createElement('div');
+    allLabel.style.cssText = `
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 4px;
+      margin-top: 12px;
+    `;
+    allLabel.textContent = 'All Countries';
+    sidebar.appendChild(allLabel);
 
-      const isFavorite = this.favoriteCountries.has(country.code);
-      const flag = this.getFlagEmoji(country.code);
+    // Countries list
+    this.countryList = document.createElement('div');
+    this.countryList.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      flex: 1;
+    `;
 
-      item.innerHTML = `
-        <span style="font-size: 18px;">${flag}</span>
-        <span style="flex: 1; color: #e5e5e5;">${country.name}</span>
-        <span style="color: #999; font-size: 12px;">${country.code}</span>
-        <button style="
-          background: none;
-          border: none;
-          color: #4ade80;
-          cursor: pointer;
-          font-size: 14px;
-          padding: 0;
-          margin: 0;
-        ">${isFavorite ? '★' : '☆'}</button>
-      `;
-
-      const btn = item.querySelector('button') as HTMLButtonElement;
-      if (btn) {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.toggleFavorite(country.code);
-          this.updateCountryList(this.searchInput?.value || '');
-        });
-      }
-
-      item.addEventListener('click', () => {
-        this.selectCountry(country.code, country.name);
-      });
-
-      item.addEventListener('mouseenter', () => {
-        if (country.code !== this.currentCountryCode) {
-          item.style.background = '#1a1a1a';
-        }
-      });
-
-      item.addEventListener('mouseleave', () => {
-        if (country.code !== this.currentCountryCode) {
-          item.style.background = 'transparent';
-        }
-      });
-
-      this.dropdownList?.appendChild(item);
+    COUNTRIES.forEach(country => {
+      const btn = this.createCountryButton(country, false);
+      this.countryList!.appendChild(btn);
     });
+
+    sidebar.appendChild(this.countryList);
+
+    return sidebar;
+  }
+
+  private createCountryButton(country: { code: string; name: string }, isFavorite: boolean): HTMLElement {
+    const btn = document.createElement('button');
+    const flag = this.getFlagEmoji(country.code);
+    const isFav = this.favorites.has(country.code);
+
+    btn.style.cssText = `
+      width: 100%;
+      padding: 8px 12px;
+      background: ${isFavorite ? '#0f5040' : '#1a1a1a'};
+      border: 1px solid ${isFavorite ? '#2a6a5a' : '#2a2a2a'};
+      border-radius: 4px;
+      color: ${isFavorite ? '#4ade80' : '#e5e5e5'};
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      text-align: left;
+    `;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = `${flag} ${country.name}`;
+
+    const starSpan = document.createElement('span');
+    starSpan.textContent = isFav ? '★' : '☆';
+    starSpan.style.cssText = `
+      font-size: 14px;
+      margin-left: 8px;
+      flex-shrink: 0;
+    `;
+
+    btn.appendChild(nameSpan);
+    btn.appendChild(starSpan);
+
+    btn.addEventListener('click', () => {
+      this.selectCountry(country.code, country.name);
+    });
+
+    btn.addEventListener('mouseenter', () => {
+      btn.style.background = isFavorite ? '#0f6050' : '#252525';
+      btn.style.borderColor = isFavorite ? '#3a7a6a' : '#3a3a3a';
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      btn.style.background = isFavorite ? '#0f5040' : '#1a1a1a';
+      btn.style.borderColor = isFavorite ? '#2a6a5a' : '#2a2a2a';
+    });
+
+    // Toggle favorite on star click
+    starSpan.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleFavorite(country.code);
+      starSpan.textContent = this.favorites.has(country.code) ? '★' : '☆';
+    });
+
+    return btn;
+  }
+
+  private filterCountries(): void {
+    if (!this.searchInput || !this.countryList) return;
+
+    const query = this.searchInput.value.toLowerCase();
+    const buttons = this.countryList.querySelectorAll('button');
+
+    buttons.forEach(btn => {
+      const text = btn.textContent?.toLowerCase() || '';
+      const matches = text.includes(query);
+      btn.style.display = matches ? 'flex' : 'none';
+    });
+  }
+
+  private showCountryList(): void {
+    if (this.countryList) {
+      this.countryList.style.display = 'flex';
+    }
   }
 
   private selectCountry(code: string, name: string): void {
-    this.currentCountryCode = code;
     if (this.searchInput) {
-      const flag = this.getFlagEmoji(code);
-      this.searchInput.value = `${flag} ${name}`;
-    }
-    if (this.dropdownList) {
-      this.dropdownList.style.display = 'none';
+      this.searchInput.value = '';
     }
 
-    if (this.panelsContainer) {
-      this.panelsContainer.innerHTML = `
-        <div style="grid-column: 1 / -1; padding: 16px; color: #4ade80;">
-          <strong>${this.getFlagEmoji(code)} ${name}</strong> selected
-          <p style="color: #999; font-size: 12px; margin-top: 8px;">Intelligence panels will load here...</p>
-        </div>
-      `;
+    if (this.countryChangeHandler) {
+      this.countryChangeHandler(code, name);
+    }
+  }
+
+  private toggleFavorite(code: string): void {
+    if (this.favorites.has(code)) {
+      this.favorites.delete(code);
+    } else {
+      this.favorites.add(code);
     }
 
-    if (this.onCountryChange) {
-      this.onCountryChange(code, name);
-    }
+    this.saveFavorites();
+  }
+
+  private saveFavorites(): void {
+    localStorage.setItem('country-dashboard-favorites', JSON.stringify(Array.from(this.favorites)));
   }
 
   private getFlagEmoji(code: string): string {
@@ -452,55 +398,19 @@ export class CountryDashboard {
     return String.fromCodePoint(...codePoints);
   }
 
-  private toggleFavorite(code: string): void {
-    if (this.favoriteCountries.has(code)) {
-      this.favoriteCountries.delete(code);
-    } else {
-      this.favoriteCountries.add(code);
-    }
-    this.saveFavoritesToStorage();
-  }
-
-  private saveFavoritesToStorage(): void {
-    localStorage.setItem('country-dashboard-favorites', JSON.stringify([...this.favoriteCountries]));
-  }
-
-  private loadFavoritesFromStorage(): void {
-    try {
-      const stored = localStorage.getItem('country-dashboard-favorites');
-      if (stored) {
-        this.favoriteCountries = new Set(JSON.parse(stored));
-      }
-    } catch {
-      // Ignore errors
-    }
-  }
-
   public setCountryChangeHandler(handler: (code: string, name: string) => void): void {
-    this.onCountryChange = handler;
+    this.countryChangeHandler = handler;
   }
 
-  public getCurrentCountry(): { code: string; name: string } {
-    const country = COUNTRIES.find(c => c.code === this.currentCountryCode);
-    return country || { code: this.currentCountryCode, name: this.currentCountryCode };
-  }
-
-  public getMapContainer(): HTMLElement | null {
-    return this.mapContainer;
+  public setMap(map: any): void {
+    this.map = map;
   }
 
   public getPanelsContainer(): HTMLElement | null {
     return this.panelsContainer;
   }
 
-  public setMap(_map: any): void {
-    // Map is used by the page controller for fitting and highlighting
-  }
-
   public destroy(): void {
     this.container.innerHTML = '';
-    this.onCountryChange = null;
-    this.mapContainer = null;
-    this.panelsContainer = null;
   }
 }
