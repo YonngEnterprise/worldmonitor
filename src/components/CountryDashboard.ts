@@ -256,7 +256,13 @@ export class CountryDashboard {
     
     this.createHeader();
     this.createMainContent();
-    this.showInitialSuggestions();
+    
+    // Ensure suggestions dropdown is properly initialized
+    setTimeout(() => {
+      this.suggestionsDropdown = this.container.querySelector('.country-suggestions-dropdown') as HTMLElement;
+      this.searchInput = this.container.querySelector('.country-search-input') as HTMLInputElement;
+      this.showInitialSuggestions();
+    }, 0);
   }
 
   private createHeader(): void {
@@ -354,12 +360,17 @@ export class CountryDashboard {
   }
 
   private showInitialSuggestions(): void {
+    if (!this.suggestionsDropdown) return;
+    
     if (this.favoriteCountries.size > 0) {
       const favorites = this.allCountries.filter((c) => this.favoriteCountries.has(c.code));
       this.renderSuggestions(favorites);
     } else {
       this.renderSuggestions(this.allCountries.slice(0, 20));
     }
+    
+    // Show the dropdown initially
+    this.showSuggestions();
   }
 
   private showFavorites(): void {
