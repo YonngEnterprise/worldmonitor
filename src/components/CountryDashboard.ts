@@ -1,6 +1,7 @@
 /**
  * Country Dashboard Component - Production Ready
  * Simplified implementation with visible sidebar and working country selector
+ * Enhanced with mobile optimization and additional features
  */
 
 const COUNTRIES = [
@@ -64,27 +65,35 @@ export class CountryDashboard {
   private map: any = null;
   private countryChangeHandler: ((code: string, name: string) => void) | null = null;
   private panelsContainer: HTMLElement | null = null;
+  private sidebarOpen: boolean = true;
+  private isMobile: boolean = false;
 
   constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
     this.options = options;
     this.favorites = new Set(options.favoriteCountries);
+    this.isMobile = window.innerWidth < 768;
+    this.sidebarOpen = !this.isMobile; // Sidebar closed by default on mobile
   }
 
   public render(): void {
-    // Build the complete HTML structure
+    // Build the complete HTML structure with mobile responsiveness
     const html = `
-      <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative;">
         <!-- Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; z-index: 100;">
-          <h1 style="margin: 0; font-size: 18px; font-weight: 600; color: #e5e5e5; letter-spacing: -0.5px;">Country Dashboard</h1>
-          <input type="text" id="country-search" placeholder="Search countries..." style="width: 250px; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; z-index: 100; gap: 12px;">
+          <h1 style="margin: 0; font-size: 18px; font-weight: 600; color: #e5e5e5; letter-spacing: -0.5px; flex-shrink: 0;">Country Dashboard</h1>
+          <button id="sidebar-toggle" style="display: none; background: #1a1a1a; border: 1px solid #2a2a2a; color: #e5e5e5; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; font-size: 16px; flex-shrink: 0;">☰</button>
+          <input type="text" id="country-search" placeholder="Search countries..." style="flex: 1; min-width: 0; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
         </div>
         
         <!-- Main Content -->
-        <div style="flex: 1; display: flex; gap: 16px; padding: 16px; overflow: hidden;">
+        <div style="flex: 1; display: flex; gap: 16px; padding: 16px; overflow: hidden; position: relative;">
+          <!-- Sidebar Overlay (Mobile) -->
+          <div id="sidebar-overlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 99;"></div>
+          
           <!-- Sidebar -->
-          <div id="sidebar" style="width: 280px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; flex-shrink: 0;">
+          <div id="sidebar" style="width: 280px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; flex-shrink: 0; position: relative; z-index: 100;">
             <!-- Favorites Section -->
             <div style="flex: 0 0 auto;">
               <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">⭐ Favorites</div>
@@ -108,6 +117,55 @@ export class CountryDashboard {
           </div>
         </div>
       </div>
+      
+      <style>
+        @media (max-width: 768px) {
+          #sidebar {
+            position: absolute !important;
+            left: 0 !important;
+            top: 56px !important;
+            bottom: 0 !important;
+            width: 280px !important;
+            background: #0a0a0a !important;
+            border-right: 1px solid #2a2a2a !important;
+            z-index: 101 !important;
+            transform: translateX(-100%) !important;
+            transition: transform 0.3s ease !important;
+          }
+          
+          #sidebar.open {
+            transform: translateX(0) !important;
+          }
+          
+          #sidebar-overlay {
+            display: block !important;
+          }
+          
+          #sidebar-overlay.hidden {
+            display: none !important;
+          }
+          
+          #sidebar-toggle {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          #country-dashboard-panels {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          #country-dashboard-map {
+            flex: 0 0 30% !important;
+          }
+          
+          #country-search {
+            font-size: 12px !important;
+          }
+        }
+      </style>
     `;
     
     this.container.innerHTML = html;
@@ -120,6 +178,9 @@ export class CountryDashboard {
     
     // Get panels container reference
     this.panelsContainer = this.container.querySelector('#country-dashboard-panels') as HTMLElement;
+    
+    // Setup mobile sidebar
+    this.setupMobileSidebar();
   }
 
   private setupEventListeners(): void {
@@ -127,6 +188,33 @@ export class CountryDashboard {
     if (searchInput) {
       searchInput.addEventListener('input', () => this.filterCountries());
     }
+  }
+
+  private setupMobileSidebar(): void {
+    if (!this.isMobile) return;
+
+    const toggleBtn = this.container.querySelector('#sidebar-toggle') as HTMLButtonElement;
+    const sidebar = this.container.querySelector('#sidebar') as HTMLElement;
+    const overlay = this.container.querySelector('#sidebar-overlay') as HTMLElement;
+
+    if (!toggleBtn || !sidebar || !overlay) return;
+
+    toggleBtn.addEventListener('click', () => {
+      this.sidebarOpen = !this.sidebarOpen;
+      if (this.sidebarOpen) {
+        sidebar.classList.add('open');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.remove('open');
+        overlay.classList.add('hidden');
+      }
+    });
+
+    overlay.addEventListener('click', () => {
+      this.sidebarOpen = false;
+      sidebar.classList.remove('open');
+      overlay.classList.add('hidden');
+    });
   }
 
   private populateCountryLists(): void {
@@ -245,6 +333,15 @@ export class CountryDashboard {
     
     // Clear filter
     this.filterCountries();
+    
+    // Close sidebar on mobile after selection
+    if (this.isMobile) {
+      this.sidebarOpen = false;
+      const sidebar = this.container.querySelector('#sidebar') as HTMLElement;
+      const overlay = this.container.querySelector('#sidebar-overlay') as HTMLElement;
+      if (sidebar) sidebar.classList.remove('open');
+      if (overlay) overlay.classList.add('hidden');
+    }
     
     if (this.countryChangeHandler) {
       this.countryChangeHandler(code, name);
