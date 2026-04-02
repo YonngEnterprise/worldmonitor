@@ -1,0 +1,357 @@
+/**
+ * Country Dashboard Mobile Optimization
+ * Responsive styles for tablet and mobile devices
+ */
+
+/* Tablet Optimization (768px - 1024px) */
+@media (max-width: 1024px) {
+  #country-dashboard-panels {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  #country-dashboard-map {
+    flex: 0 0 35% !important;
+  }
+
+  #sidebar {
+    width: 240px !important;
+  }
+}
+
+/* Tablet Portrait (768px) */
+@media (max-width: 768px) {
+  /* Main layout */
+  #country-dashboard-main {
+    flex-direction: column !important;
+  }
+
+  /* Sidebar becomes overlay */
+  #sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 56px !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    background: #0a0a0a !important;
+    border-right: 1px solid #2a2a2a !important;
+    z-index: 101 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  #sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  /* Sidebar overlay */
+  #sidebar-overlay {
+    position: fixed !important;
+    top: 56px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 99 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+  }
+
+  #sidebar-overlay.visible {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Sidebar toggle button */
+  #sidebar-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Header adjustments */
+  #country-dashboard-header {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 56px !important;
+  }
+
+  /* Search input */
+  #country-search {
+    flex: 1 !important;
+    min-width: 150px !important;
+  }
+
+  /* Panels grid */
+  #country-dashboard-panels {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Map height */
+  #country-dashboard-map {
+    flex: 0 0 30% !important;
+    min-height: 200px !important;
+  }
+
+  /* Panel styling for mobile */
+  .country-panel {
+    max-height: 250px !important;
+  }
+
+  .country-panel-header {
+    padding: 10px !important;
+    font-size: 12px !important;
+  }
+
+  .country-panel-content {
+    padding: 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* Country button adjustments */
+  .country-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* Favorites section */
+  #favorites-list {
+    max-height: 100px !important;
+  }
+
+  /* Main content area */
+  #country-dashboard-main {
+    gap: 12px !important;
+  }
+}
+
+/* Mobile Landscape (480px - 768px) */
+@media (max-width: 768px) and (orientation: landscape) {
+  #country-dashboard-map {
+    flex: 0 0 25% !important;
+    min-height: 150px !important;
+  }
+
+  #country-dashboard-panels {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Mobile Portrait (480px) */
+@media (max-width: 480px) {
+  /* Header */
+  #country-dashboard-header {
+    height: auto !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 8px !important;
+  }
+
+  h1 {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+
+  /* Search input */
+  #country-search {
+    width: 100% !important;
+    height: 36px !important;
+    font-size: 12px !important;
+    padding: 0 10px !important;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 100% !important;
+    max-width: 280px !important;
+  }
+
+  /* Main content */
+  #country-dashboard-main {
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  /* Map */
+  #country-dashboard-map {
+    flex: 0 0 25% !important;
+    min-height: 120px !important;
+    font-size: 12px !important;
+  }
+
+  /* Panels */
+  #country-dashboard-panels {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    padding-right: 4px !important;
+  }
+
+  .country-panel {
+    max-height: 200px !important;
+  }
+
+  .country-panel-header {
+    padding: 8px !important;
+    font-size: 11px !important;
+  }
+
+  .country-panel-content {
+    padding: 8px !important;
+    font-size: 11px !important;
+    max-height: 150px !important;
+  }
+
+  /* Country buttons */
+  .country-btn {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+
+  /* Favorites section */
+  #favorites-list {
+    max-height: 80px !important;
+  }
+
+  /* Countries list */
+  #countries-list {
+    max-height: 200px !important;
+  }
+
+  /* Sidebar sections */
+  .sidebar-section-title {
+    font-size: 10px !important;
+    padding: 0 2px !important;
+    margin-bottom: 6px !important;
+  }
+}
+
+/* Small Mobile (320px) */
+@media (max-width: 360px) {
+  h1 {
+    font-size: 14px !important;
+  }
+
+  #country-search {
+    font-size: 11px !important;
+  }
+
+  #sidebar {
+    width: 100vw !important;
+    max-width: none !important;
+  }
+
+  #country-dashboard-panels {
+    gap: 4px !important;
+  }
+
+  .country-panel-header {
+    padding: 6px !important;
+    font-size: 10px !important;
+  }
+
+  .country-panel-content {
+    padding: 6px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch target size */
+  button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  #country-search {
+    min-height: 44px !important;
+  }
+
+  .country-btn {
+    padding: 10px 12px !important;
+    min-height: 40px !important;
+  }
+
+  /* Remove hover effects on touch devices */
+  .country-btn:hover {
+    background: inherit !important;
+    border-color: inherit !important;
+  }
+
+  /* Add active state instead */
+  .country-btn:active {
+    opacity: 0.8 !important;
+  }
+}
+
+/* Landscape mode optimizations */
+@media (orientation: landscape) {
+  #country-dashboard-header {
+    height: 48px !important;
+  }
+
+  #country-dashboard-map {
+    flex: 0 0 35% !important;
+  }
+
+  #country-dashboard-panels {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  #sidebar-toggle,
+  #sidebar-overlay {
+    display: none !important;
+  }
+
+  #sidebar {
+    position: static !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  #country-dashboard-panels {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode preference */
+@media (prefers-color-scheme: dark) {
+  #country-dashboard-main {
+    background: #0a0a0a !important;
+    color: #e5e5e5 !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  #country-dashboard-header {
+    border-bottom: 2px solid #4ade80 !important;
+  }
+
+  .country-btn {
+    border-width: 2px !important;
+  }
+
+  .country-panel-header {
+    border-bottom: 2px solid #2a2a2a !important;
+  }
+}
