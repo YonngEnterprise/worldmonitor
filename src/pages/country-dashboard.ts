@@ -21,21 +21,34 @@ export class CountryDashboardPage {
   }
 
   public render(defaultCountry: string = 'ID'): void {
+    console.log('CountryDashboardPage.render() called with country:', defaultCountry);
     this.container.innerHTML = '';
-    this.dashboard = new CountryDashboard(this.container, {
-      defaultCountry,
-      favoriteCountries: this.loadFavorites(),
-    });
+    console.log('Container cleared, creating dashboard...');
+    
+    try {
+      this.dashboard = new CountryDashboard(this.container, {
+        defaultCountry,
+        favoriteCountries: this.loadFavorites(),
+      });
+      console.log('CountryDashboard instance created successfully');
 
-    this.dashboard.setCountryChangeHandler((code, name) => {
-      this.onCountrySelected(code, name);
-    });
+      this.dashboard.setCountryChangeHandler((code, name) => {
+        this.onCountrySelected(code, name);
+      });
+      console.log('Country change handler set');
 
-    this.dashboard.setMap(this.ctx.map!);
-    this.dashboard.render();
+      this.dashboard.setMap(this.ctx.map!);
+      console.log('Map set, calling render()...');
+      this.dashboard.render();
+      console.log('Dashboard render() completed successfully');
 
-    // Load initial country
-    this.onCountrySelected(defaultCountry, getCountryNameByCode(defaultCountry) || defaultCountry);
+      // Load initial country
+      this.onCountrySelected(defaultCountry, getCountryNameByCode(defaultCountry) || defaultCountry);
+      console.log('Initial country loaded');
+    } catch (error) {
+      console.error('Error in CountryDashboardPage.render():', error);
+      throw error;
+    }
   }
 
   private onCountrySelected(code: string, name: string): void {
