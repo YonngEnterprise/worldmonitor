@@ -3,8 +3,7 @@
  * Provides a focused view of a single country with:
  * - Country-scoped map with nearby infrastructure
  * - Country selector (searchable dropdown + favorites)
- * - Intelligence panels (CII, Risk, News, Economic, Infrastructure, etc.)
- * - Similar 3-column grid layout as world view
+ * - Country brief panel
  */
 
 import type { MapContainer } from '@/components';
@@ -47,6 +46,8 @@ export class CountryDashboard {
 
   public render(): void {
     this.container.innerHTML = '';
+    this.container.style.cssText = 'display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden;';
+    
     this.createHeader();
     this.createMainContent();
   }
@@ -85,16 +86,19 @@ export class CountryDashboard {
   private createMainContent(): void {
     const main = document.createElement('div');
     main.className = 'country-dashboard-main';
+    main.style.cssText = 'display: flex; flex-direction: column; flex: 1; width: 100%; overflow: hidden;';
 
     // Create map container
     const mapContainer = document.createElement('div');
     mapContainer.className = 'country-dashboard-map';
     mapContainer.id = 'country-dashboard-map';
+    mapContainer.style.cssText = 'height: 50vh; flex-shrink: 0; width: 100%; overflow: hidden;';
     main.appendChild(mapContainer);
 
     // Create panels grid
     const panelsGrid = document.createElement('div');
     panelsGrid.className = 'country-dashboard-panels';
+    panelsGrid.style.cssText = 'flex: 1; overflow-y: auto; width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 4px; padding: 4px; align-content: start;';
     main.appendChild(panelsGrid);
 
     this.container.appendChild(main);

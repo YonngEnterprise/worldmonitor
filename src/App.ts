@@ -838,55 +838,62 @@ export class App {
       await this.dataLoader.hydrateHappyPanelsFromCache();
     }
 
-    // Phase 2: Shared UI components
-    this.state.signalModal = new SignalModal();
-    this.state.signalModal.setLocationClickHandler((lat, lon) => {
-      this.state.map?.setCenter(lat, lon, 4);
-    });
-    if (!this.state.isMobile) {
-      this.state.findingsBadge = new IntelligenceGapBadge();
-      this.state.findingsBadge.setOnSignalClick((signal) => {
-        if (this.state.countryBriefPage?.isVisible()) return;
-        if (localStorage.getItem('wm-settings-open') === '1') return;
-        this.state.signalModal?.showSignal(signal);
+    // Skip UI setup in dashboard mode
+    if (!this.isDashboardMode) {
+      // Phase 2: Shared UI components
+      this.state.signalModal = new SignalModal();
+      this.state.signalModal.setLocationClickHandler((lat, lon) => {
+        this.state.map?.setCenter(lat, lon, 4);
       });
-      this.state.findingsBadge.setOnAlertClick((alert) => {
-        if (this.state.countryBriefPage?.isVisible()) return;
-        if (localStorage.getItem('wm-settings-open') === '1') return;
-        this.state.signalModal?.showAlert(alert);
-      });
+      if (!this.state.isMobile) {
+        this.state.findingsBadge = new IntelligenceGapBadge();
+        this.state.findingsBadge.setOnSignalClick((signal) => {
+          if (this.state.countryBriefPage?.isVisible()) return;
+          if (localStorage.getItem('wm-settings-open') === '1') return;
+          this.state.signalModal?.showSignal(signal);
+        });
+        this.state.findingsBadge.setOnAlertClick((alert) => {
+          if (this.state.countryBriefPage?.isVisible()) return;
+          if (localStorage.getItem('wm-settings-open') === '1') return;
+          this.state.signalModal?.showAlert(alert);
+        });
+      }
+
+      if (!this.state.isMobile) {
+        initBreakingNewsAlerts();
+        this.state.breakingBanner = new BreakingNewsBanner();
+      }
+
+      // Phase 3: UI setup methods
+      this.eventHandlers.startHeaderClock();
+      this.eventHandlers.setupPlaybackControl();
+      this.eventHandlers.setupStatusPanel();
+      this.eventHandlers.setupPizzIntIndicator();
+      this.eventHandlers.setupLlmStatusIndicator();
+      this.eventHandlers.setupExportPanel();
+
+      // Correlation engine
+      const correlationEngine = new CorrelationEngine();
+      correlationEngine.registerAdapter(militaryAdapter);
+      correlationEngine.registerAdapter(escalationAdapter);
+      correlationEngine.registerAdapter(economicAdapter);
+      correlationEngine.registerAdapter(disasterAdapter);
+      this.state.correlationEngine = correlationEngine;
+      this.eventHandlers.setupUnifiedSettings();
+      if (isProUser()) this.eventHandlers.setupAuthWidget();
     }
-
-    if (!this.state.isMobile) {
-      initBreakingNewsAlerts();
-      this.state.breakingBanner = new BreakingNewsBanner();
-    }
-
-    // Phase 3: UI setup methods
-    this.eventHandlers.startHeaderClock();
-    this.eventHandlers.setupPlaybackControl();
-    this.eventHandlers.setupStatusPanel();
-    this.eventHandlers.setupPizzIntIndicator();
-    this.eventHandlers.setupLlmStatusIndicator();
-    this.eventHandlers.setupExportPanel();
-
-    // Correlation engine
-    const correlationEngine = new CorrelationEngine();
-    correlationEngine.registerAdapter(militaryAdapter);
-    correlationEngine.registerAdapter(escalationAdapter);
-    correlationEngine.registerAdapter(economicAdapter);
-    correlationEngine.registerAdapter(disasterAdapter);
-    this.state.correlationEngine = correlationEngine;
-    this.eventHandlers.setupUnifiedSettings();
-    if (isProUser()) this.eventHandlers.setupAuthWidget();
 
     // Phase 4: SearchManager, MapLayerHandlers, CountryIntel
-    this.searchManager.init();
-    this.eventHandlers.setupMapLayerHandlers();
+    if (!this.isDashboardMode) {
+      this.searchManager.init();
+      this.eventHandlers.setupMapLayerHandlers();
+    }
     this.countryIntel.init();
 
     // Phase 5: Event listeners + URL sync
-    this.eventHandlers.init();
+    if (!this.isDashboardMode) {
+      this.eventHandlers.init();
+    }
     // Capture deep link params BEFORE URL sync overwrites them
     const initState = parseMapUrlState(window.location.search, this.state.mapLayers);
     this.pendingDeepLinkCountry = initState.country ?? null;
