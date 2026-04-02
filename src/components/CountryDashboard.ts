@@ -1,6 +1,6 @@
 /**
- * Country Dashboard Component - Responsive Implementation
- * Works on all screen sizes with responsive layout
+ * Country Dashboard Component - Production Ready
+ * Simplified implementation with visible sidebar and working country selector
  */
 
 const COUNTRIES = [
@@ -64,7 +64,6 @@ export class CountryDashboard {
   private map: any = null;
   private countryChangeHandler: ((code: string, name: string) => void) | null = null;
   private panelsContainer: HTMLElement | null = null;
-  private sidebarOpen = false;
 
   constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
@@ -73,40 +72,39 @@ export class CountryDashboard {
   }
 
   public render(): void {
-    // Build the complete HTML structure with responsive layout
+    // Build the complete HTML structure
     const html = `
       <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <!-- Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; z-index: 100; gap: 12px;">
-          <h1 style="margin: 0; font-size: 18px; font-weight: 600; color: #e5e5e5; letter-spacing: -0.5px; white-space: nowrap;">Country Dashboard</h1>
-          <input type="text" id="country-search" placeholder="Search..." style="flex: 1; min-width: 150px; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
-          <button id="sidebar-toggle" style="height: 32px; width: 32px; padding: 0; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px;">☰</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; z-index: 100;">
+          <h1 style="margin: 0; font-size: 18px; font-weight: 600; color: #e5e5e5; letter-spacing: -0.5px;">Country Dashboard</h1>
+          <input type="text" id="country-search" placeholder="Search countries..." style="width: 250px; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
         </div>
         
         <!-- Main Content -->
-        <div style="flex: 1; display: flex; gap: 0; overflow: hidden;">
-          <!-- Sidebar (collapsible on mobile) -->
-          <div id="sidebar" style="width: 280px; display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow: hidden; background: #0f0f0f; border-right: 1px solid #2a2a2a; flex-shrink: 0; max-height: calc(100vh - 56px); overflow-y: auto;">
+        <div style="flex: 1; display: flex; gap: 16px; padding: 16px; overflow: hidden;">
+          <!-- Sidebar -->
+          <div id="sidebar" style="width: 280px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; flex-shrink: 0;">
             <!-- Favorites Section -->
-            <div>
-              <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">Favorites</div>
+            <div style="flex: 0 0 auto;">
+              <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">⭐ Favorites</div>
               <div id="favorites-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto;"></div>
             </div>
             
             <!-- All Countries Section -->
-            <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-              <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">All Countries</div>
+            <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0;">
+              <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">🌍 All Countries</div>
               <div id="countries-list" style="display: flex; flex-direction: column; gap: 4px; overflow-y: auto; flex: 1;"></div>
             </div>
           </div>
           
           <!-- Main Area -->
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 16px; overflow: hidden;">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; overflow: hidden;">
             <!-- Map -->
-            <div id="country-dashboard-map" style="flex: 0 0 40%; background: #141414; border: 1px solid #2a2a2a; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">Map will be rendered here</div>
+            <div id="country-dashboard-map" style="flex: 0 0 40%; background: #141414; border: 1px solid #2a2a2a; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">🗺️ Map will be rendered here</div>
             
             <!-- Panels -->
-            <div id="country-dashboard-panels" style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 8px;">Select a country to view intelligence panels</div>
+            <div id="country-dashboard-panels" style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 8px;">📊 Select a country to view intelligence panels</div>
           </div>
         </div>
       </div>
@@ -129,19 +127,6 @@ export class CountryDashboard {
     if (searchInput) {
       searchInput.addEventListener('input', () => this.filterCountries());
     }
-    
-    const sidebarToggle = this.container.querySelector('#sidebar-toggle') as HTMLButtonElement;
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener('click', () => this.toggleSidebar());
-    }
-  }
-
-  private toggleSidebar(): void {
-    const sidebar = this.container.querySelector('#sidebar') as HTMLElement;
-    if (!sidebar) return;
-    
-    this.sidebarOpen = !this.sidebarOpen;
-    sidebar.style.display = this.sidebarOpen ? 'flex' : 'none';
   }
 
   private populateCountryLists(): void {
@@ -166,7 +151,7 @@ export class CountryDashboard {
     if (!hasFavorites) {
       const empty = document.createElement('div');
       empty.style.cssText = 'font-size: 12px; color: #666; padding: 8px 4px;';
-      empty.textContent = 'No favorites yet';
+      empty.textContent = 'No favorites yet - click ☆ to add';
       favoritesList.appendChild(empty);
     }
     
@@ -204,7 +189,7 @@ export class CountryDashboard {
     
     const starSpan = document.createElement('span');
     starSpan.textContent = isFav ? '★' : '☆';
-    starSpan.style.cssText = 'font-size: 14px; margin-left: 8px; flex-shrink: 0;';
+    starSpan.style.cssText = 'font-size: 14px; margin-left: 8px; flex-shrink: 0; cursor: pointer;';
     
     btn.appendChild(nameSpan);
     btn.appendChild(starSpan);
