@@ -9,7 +9,7 @@ import { CountryDashboard } from '@/components/CountryDashboard';
 import { CountryIntelManager } from '@/app/country-intel';
 import { getCountryNameByCode, getCountryBbox } from '@/services/country-geometry';
 import maplibregl from 'maplibre-gl';
-import { GeoJsonLayer, PolygonLayer, ScatterplotLayer } from '@deck.gl/layers';
+import { PolygonLayer } from '@deck.gl/layers';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { registerPMTilesProtocol, FALLBACK_DARK_STYLE } from '@/config/basemap';
 
@@ -19,7 +19,7 @@ export class CountryDashboardPage {
   private mapContainer: HTMLElement | null = null;
   private maplibreMap: maplibregl.Map | null = null;
   private deckOverlay: MapboxOverlay | null = null;
-  private currentCountryCode: string = 'ID';
+  private _currentCountryCode: string = 'ID';
   private currentCountryGeoJson: any = null;
 
   constructor(container: HTMLElement, _ctx: AppContext, _countryIntel: CountryIntelManager) {
@@ -29,7 +29,7 @@ export class CountryDashboardPage {
   public render(defaultCountry: string = 'ID'): void {
     console.log('CountryDashboardPage.render() called with country:', defaultCountry);
     this.container.innerHTML = '';
-    this.currentCountryCode = defaultCountry;
+    this._currentCountryCode = defaultCountry;
     
     try {
       this.dashboard = new CountryDashboard(this.container, {
@@ -120,7 +120,7 @@ export class CountryDashboardPage {
     url.searchParams.set('country', code);
     window.history.replaceState({}, '', url.toString());
 
-    this.currentCountryCode = code;
+    this._currentCountryCode = code;
 
     // Fit map to country with bounds
     this.fitMapToCountry(code);
@@ -374,9 +374,9 @@ export class CountryDashboardPage {
     }
   }
 
-  private getFlagEmoji(code: string): string {
+  private getFlagEmoji(_code: string): string {
     // Convert country code to flag emoji
-    const codePoints = code
+    const codePoints = _code
       .toUpperCase()
       .split('')
       .map(char => 127397 + char.charCodeAt(0));

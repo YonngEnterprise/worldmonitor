@@ -3,6 +3,7 @@
  * Provides a searchable country selector with favorites and map/panel integration
  */
 
+// Country list - used for country selector
 const COUNTRIES = [
   { code: 'US', name: 'United States' },
   { code: 'CN', name: 'China' },
@@ -45,17 +46,17 @@ const COUNTRIES = [
 
 export class CountryDashboard {
   private container: HTMLElement;
-  private favorites: Set<string>;
-  private countryChangeHandler: ((code: string, name: string) => void) | null = null;
+  private _favorites: Set<string>;
+  private _countryChangeHandler: ((code: string, name: string) => void) | null = null;
   private panelsContainer: HTMLElement | null = null;
-  private sidebarOpen: boolean = true;
+  private _sidebarOpen: boolean = true;
   private isMobile: boolean = false;
 
   constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
     this.container = container;
-    this.favorites = new Set(options.favoriteCountries);
+    this._favorites = new Set(options.favoriteCountries);
     this.isMobile = window.innerWidth < 768;
-    this.sidebarOpen = !this.isMobile; // Sidebar closed by default on mobile
+    this._sidebarOpen = !this.isMobile; // Sidebar closed by default on mobile
   }
 
   public render(): void {
@@ -94,11 +95,12 @@ export class CountryDashboard {
   }
 
   public setCountryChangeHandler(handler: (code: string, name: string) => void): void {
-    this.countryChangeHandler = handler;
+    this._countryChangeHandler = handler;
   }
 
   public setMap(_map: any): void {
     // Map will be set here
+    // _map parameter used for future map integration
   }
 
   public getPanelsContainer(): HTMLElement | null {
