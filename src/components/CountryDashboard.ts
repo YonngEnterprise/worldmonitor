@@ -1,9 +1,8 @@
 /**
- * Country Dashboard Component
- * Provides a country-specific intelligence dashboard with searchable country list
+ * Country Dashboard Component - Minimal Implementation
+ * Direct HTML rendering without complex component logic
  */
 
-// List of countries with codes
 const COUNTRIES = [
   { code: 'US', name: 'United States' },
   { code: 'GB', name: 'United Kingdom' },
@@ -64,8 +63,6 @@ export class CountryDashboard {
   private favorites: Set<string>;
   private map: any = null;
   private countryChangeHandler: ((code: string, name: string) => void) | null = null;
-  private searchInput: HTMLInputElement | null = null;
-  private countryList: HTMLElement | null = null;
   private panelsContainer: HTMLElement | null = null;
 
   constructor(container: HTMLElement, options: { defaultCountry: string; favoriteCountries: string[] }) {
@@ -75,230 +72,101 @@ export class CountryDashboard {
   }
 
   public render(): void {
-    console.log('CountryDashboard.render() called');
-    this.container.innerHTML = '';
-    this.container.style.cssText = `
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background: #0a0a0a;
-      color: #e5e5e5;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    // Build the complete HTML structure directly
+    const html = `
+      <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; z-index: 100;">
+          <h1 style="margin: 0; font-size: 18px; font-weight: 600; color: #e5e5e5; letter-spacing: -0.5px;">Country Dashboard</h1>
+          <input type="text" id="country-search" placeholder="Search countries..." style="width: 280px; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
+        </div>
+        
+        <!-- Main Content -->
+        <div style="flex: 1; display: flex; gap: 16px; padding: 16px; overflow: hidden;">
+          <!-- Sidebar -->
+          <div style="width: 280px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;">
+            <!-- Favorites Section -->
+            <div>
+              <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">Favorites</div>
+              <div id="favorites-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto;"></div>
+            </div>
+            
+            <!-- All Countries Section -->
+            <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+              <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">All Countries</div>
+              <div id="countries-list" style="display: flex; flex-direction: column; gap: 4px; overflow-y: auto; flex: 1;"></div>
+            </div>
+          </div>
+          
+          <!-- Main Area -->
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; overflow: hidden;">
+            <!-- Map -->
+            <div id="country-dashboard-map" style="flex: 0 0 40%; background: #141414; border: 1px solid #2a2a2a; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">Map will be rendered here</div>
+            
+            <!-- Panels -->
+            <div id="country-dashboard-panels" style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 8px;">Select a country to view intelligence panels</div>
+          </div>
+        </div>
+      </div>
     `;
-    console.log('Container cleared and styled');
-
-    // Create header
-    const header = this.createHeader();
-    this.container.appendChild(header);
-    console.log('Header created and appended');
-
-    // Create main content area
-    const mainContent = document.createElement('div');
-    mainContent.style.cssText = `
-      flex: 1;
-      display: flex;
-      gap: 16px;
-      padding: 16px;
-      overflow: hidden;
-    `;
-
-    // Create sidebar with country list
-    const sidebar = this.createSidebar();
-    mainContent.appendChild(sidebar);
-
-    // Create main area (map + panels)
-    const mainArea = document.createElement('div');
-    mainArea.style.cssText = `
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow: hidden;
-    `;
-
-    // Create map container
-    const mapContainer = document.createElement('div');
-    mapContainer.id = 'country-dashboard-map';
-    mapContainer.style.cssText = `
-      flex: 0 0 40%;
-      background: #141414;
-      border: 1px solid #2a2a2a;
-      border-radius: 4px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-      font-size: 14px;
-    `;
-    mapContainer.textContent = 'Map will be rendered here';
-    mainArea.appendChild(mapContainer);
-
-    // Create panels container
-    this.panelsContainer = document.createElement('div');
-    this.panelsContainer.id = 'country-dashboard-panels';
-    this.panelsContainer.style.cssText = `
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 12px;
-      overflow-y: auto;
-      padding-right: 8px;
-    `;
-    this.panelsContainer.textContent = 'Select a country to view intelligence panels';
-    mainArea.appendChild(this.panelsContainer);
-
-    mainContent.appendChild(mainArea);
-    this.container.appendChild(mainContent);
-    console.log('Main content created and appended');
-    console.log('Dashboard render complete');
+    
+    this.container.innerHTML = html;
+    
+    // Setup event listeners
+    this.setupEventListeners();
+    
+    // Populate country lists
+    this.populateCountryLists();
+    
+    // Get panels container reference
+    this.panelsContainer = this.container.querySelector('#country-dashboard-panels') as HTMLElement;
   }
 
-  private createHeader(): HTMLElement {
-    console.log('Creating header...');
-    const header = document.createElement('div');
-    header.style.cssText = `
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
-      padding: 0 16px;
-      background: #141414;
-      border-bottom: 1px solid #2a2a2a;
-      flex-shrink: 0;
-      z-index: 100;
-    `;
-
-    const title = document.createElement('h1');
-    title.style.cssText = `
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #e5e5e5;
-      letter-spacing: -0.5px;
-    `;
-    title.textContent = 'Country Dashboard';
-    header.appendChild(title);
-
-    return header;
+  private setupEventListeners(): void {
+    const searchInput = this.container.querySelector('#country-search') as HTMLInputElement;
+    if (searchInput) {
+      searchInput.addEventListener('input', () => this.filterCountries());
+    }
   }
 
-  private createSidebar(): HTMLElement {
-    console.log('Creating sidebar...');
-    const sidebar = document.createElement('div');
-    sidebar.style.cssText = `
-      width: 280px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow: hidden;
-    `;
-
-    // Search input
-    this.searchInput = document.createElement('input');
-    this.searchInput.type = 'text';
-    this.searchInput.placeholder = 'Search countries...';
-    this.searchInput.style.cssText = `
-      width: 100%;
-      height: 32px;
-      padding: 0 12px;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 4px;
-      color: #e5e5e5;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      box-sizing: border-box;
-    `;
-
-    this.searchInput.addEventListener('input', () => this.filterCountries());
-    this.searchInput.addEventListener('focus', () => this.showCountryList());
-    sidebar.appendChild(this.searchInput);
-
-    // Favorites section
-    const favoritesLabel = document.createElement('div');
-    favoritesLabel.style.cssText = `
-      font-size: 11px;
-      color: #999;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 0 4px;
-      margin-top: 4px;
-    `;
-    favoritesLabel.textContent = 'Favorites';
-    sidebar.appendChild(favoritesLabel);
-
-    // Favorites list
-    const favoritesList = document.createElement('div');
-    favoritesList.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 120px;
-      overflow-y: auto;
-    `;
-
-    this.favorites.forEach(code => {
-      const country = COUNTRIES.find(c => c.code === code);
-      if (country) {
-        const btn = this.createCountryButton(country, true);
-        favoritesList.appendChild(btn);
+  private populateCountryLists(): void {
+    const favoritesList = this.container.querySelector('#favorites-list') as HTMLElement;
+    const countriesList = this.container.querySelector('#countries-list') as HTMLElement;
+    
+    if (!favoritesList || !countriesList) return;
+    
+    // Clear existing content
+    favoritesList.innerHTML = '';
+    countriesList.innerHTML = '';
+    
+    // Add favorites
+    let hasFavorites = false;
+    COUNTRIES.forEach(country => {
+      if (this.favorites.has(country.code)) {
+        favoritesList.appendChild(this.createCountryButton(country, true));
+        hasFavorites = true;
       }
     });
-
-    if (this.favorites.size === 0) {
+    
+    if (!hasFavorites) {
       const empty = document.createElement('div');
-      empty.style.cssText = `
-        font-size: 12px;
-        color: #666;
-        padding: 8px 4px;
-      `;
+      empty.style.cssText = 'font-size: 12px; color: #666; padding: 8px 4px;';
       empty.textContent = 'No favorites yet';
       favoritesList.appendChild(empty);
     }
-
-    sidebar.appendChild(favoritesList);
-
-    // All countries section
-    const allLabel = document.createElement('div');
-    allLabel.style.cssText = `
-      font-size: 11px;
-      color: #999;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 0 4px;
-      margin-top: 12px;
-    `;
-    allLabel.textContent = 'All Countries';
-    sidebar.appendChild(allLabel);
-
-    // Countries list
-    this.countryList = document.createElement('div');
-    this.countryList.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      overflow-y: auto;
-      flex: 1;
-    `;
-
+    
+    // Add all countries
     COUNTRIES.forEach(country => {
-      const btn = this.createCountryButton(country, false);
-      this.countryList!.appendChild(btn);
+      countriesList.appendChild(this.createCountryButton(country, false));
     });
-
-    sidebar.appendChild(this.countryList);
-
-    return sidebar;
   }
 
   private createCountryButton(country: { code: string; name: string }, isFavorite: boolean): HTMLElement {
     const btn = document.createElement('button');
     const flag = this.getFlagEmoji(country.code);
     const isFav = this.favorites.has(country.code);
-
+    
+    btn.className = `country-btn-${country.code}`;
     btn.style.cssText = `
       width: 100%;
       padding: 8px 12px;
@@ -315,51 +183,53 @@ export class CountryDashboard {
       transition: all 0.2s ease;
       text-align: left;
     `;
-
+    
     const nameSpan = document.createElement('span');
     nameSpan.textContent = `${flag} ${country.name}`;
-
+    
     const starSpan = document.createElement('span');
     starSpan.textContent = isFav ? '★' : '☆';
-    starSpan.style.cssText = `
-      font-size: 14px;
-      margin-left: 8px;
-      flex-shrink: 0;
-    `;
-
+    starSpan.style.cssText = 'font-size: 14px; margin-left: 8px; flex-shrink: 0;';
+    
     btn.appendChild(nameSpan);
     btn.appendChild(starSpan);
-
+    
+    // Click to select country
     btn.addEventListener('click', () => {
       this.selectCountry(country.code, country.name);
     });
-
+    
+    // Hover effects
     btn.addEventListener('mouseenter', () => {
       btn.style.background = isFavorite ? '#0f6050' : '#252525';
       btn.style.borderColor = isFavorite ? '#3a7a6a' : '#3a3a3a';
     });
-
+    
     btn.addEventListener('mouseleave', () => {
       btn.style.background = isFavorite ? '#0f5040' : '#1a1a1a';
       btn.style.borderColor = isFavorite ? '#2a6a5a' : '#2a2a2a';
     });
-
+    
     // Toggle favorite on star click
     starSpan.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggleFavorite(country.code);
       starSpan.textContent = this.favorites.has(country.code) ? '★' : '☆';
+      
+      // Refresh the lists
+      this.populateCountryLists();
     });
-
+    
     return btn;
   }
 
   private filterCountries(): void {
-    if (!this.searchInput || !this.countryList) return;
-
-    const query = this.searchInput.value.toLowerCase();
-    const buttons = this.countryList.querySelectorAll('button');
-
+    const searchInput = this.container.querySelector('#country-search') as HTMLInputElement;
+    if (!searchInput) return;
+    
+    const query = searchInput.value.toLowerCase();
+    const buttons = this.container.querySelectorAll('button');
+    
     buttons.forEach(btn => {
       const text = btn.textContent?.toLowerCase() || '';
       const matches = text.includes(query);
@@ -367,17 +237,12 @@ export class CountryDashboard {
     });
   }
 
-  private showCountryList(): void {
-    if (this.countryList) {
-      this.countryList.style.display = 'flex';
-    }
-  }
-
   private selectCountry(code: string, name: string): void {
-    if (this.searchInput) {
-      this.searchInput.value = '';
+    const searchInput = this.container.querySelector('#country-search') as HTMLInputElement;
+    if (searchInput) {
+      searchInput.value = '';
     }
-
+    
     if (this.countryChangeHandler) {
       this.countryChangeHandler(code, name);
     }
@@ -389,7 +254,7 @@ export class CountryDashboard {
     } else {
       this.favorites.add(code);
     }
-
+    
     this.saveFavorites();
   }
 
