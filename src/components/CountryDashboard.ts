@@ -78,13 +78,15 @@ export class CountryDashboard {
         <!-- Header -->
         <div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; z-index: 100;">
           <h1 style="margin: 0; font-size: 18px; font-weight: 600; color: #e5e5e5; letter-spacing: -0.5px;">Country Dashboard</h1>
-          <input type="text" id="country-search" placeholder="Search countries..." style="width: 280px; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
         </div>
         
         <!-- Main Content -->
         <div style="flex: 1; display: flex; gap: 16px; padding: 16px; overflow: hidden;">
           <!-- Sidebar -->
-          <div style="width: 280px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;">
+          <div style="width: 280px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; flex-shrink: 0;">
+            <!-- Search -->
+            <input type="text" id="country-search" placeholder="Search countries..." style="width: 100%; height: 32px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; color: #e5e5e5; font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box;">
+            
             <!-- Favorites Section -->
             <div>
               <div style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; margin-bottom: 8px;">Favorites</div>
