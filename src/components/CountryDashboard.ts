@@ -232,7 +232,7 @@ export class CountryDashboard {
     header.appendChild(titleDiv);
 
     const selectorDiv = document.createElement('div');
-    selectorDiv.style.cssText = 'position: relative; width: 280px;';
+    selectorDiv.style.cssText = 'position: relative; width: 280px; z-index: 10000;';
 
     this.searchInput = document.createElement('input');
     this.searchInput.type = 'text';
@@ -266,7 +266,7 @@ export class CountryDashboard {
       overflow-y: auto;
       z-index: 1000;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      display: none;
+      display: block;
     `;
 
     selectorDiv.appendChild(this.searchInput);
