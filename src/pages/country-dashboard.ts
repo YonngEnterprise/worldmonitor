@@ -7,22 +7,22 @@
 import type { AppContext } from '@/app/app-context';
 import { CountryDashboard } from '@/components/CountryDashboard';
 import { CountryIntelManager } from '@/app/country-intel';
-import { getCountryNameByCode, getCountryBounds } from '@/services/country-geometry';
+import { getCountryNameByCode, getCountryBbox } from '@/services/country-geometry';
 import type { DeckGLMap } from '@/components/DeckGLMap';
 
 export class CountryDashboardPage {
   private dashboard: CountryDashboard | null = null;
   private container: HTMLElement;
-  private ctx: AppContext;
-  private countryIntel: CountryIntelManager;
-  private currentCountryCode: string = 'ID';
-  private mapInstance: DeckGLMap | null = null;
+  private _ctx: AppContext;
+  private _countryIntel: CountryIntelManager;
+  private _currentCountryCode: string = 'ID';
+  private mapInstance: any = null;
 
   constructor(container: HTMLElement, ctx: AppContext, countryIntel: CountryIntelManager) {
     this.container = container;
-    this.ctx = ctx;
-    this.countryIntel = countryIntel;
-    this.mapInstance = ctx.map as DeckGLMap;
+    this._ctx = ctx;
+    this._countryIntel = countryIntel;
+    this.mapInstance = ctx.map;
   }
 
   public render(defaultCountry: string = 'ID'): void {
@@ -51,19 +51,19 @@ export class CountryDashboardPage {
     }
   }
 
-  private onCountrySelected(code: string, name: string): void {
-    this.currentCountryCode = code;
+  private onCountrySelected(_code: string, name: string): void {
+    this._currentCountryCode = _code;
     
     // Update URL
     const url = new URL(window.location.href);
-    url.searchParams.set('country', code);
+    url.searchParams.set('country', _code);
     window.history.replaceState({}, '', url.toString());
 
     // Fit map to country with bounds
-    this.fitMapToCountry(code);
+    this.fitMapToCountry(_code);
 
     // Load and display country intelligence content
-    this.loadCountryContent(code, name);
+    this.loadCountryContent(_code, name);
   }
 
   private fitMapToCountry(code: string): void {
@@ -71,7 +71,7 @@ export class CountryDashboardPage {
 
     try {
       // Get country bounds
-      const bounds = getCountryBounds(code);
+      const bounds = getCountryBbox(code);
       if (bounds) {
         // Fit map to country bounds with padding
         const padding = 0.1; // 10% padding
@@ -86,21 +86,10 @@ export class CountryDashboardPage {
           maxLat + (latDiff * padding),
         ];
 
-        // Use fitBounds if available, otherwise use zoom/center
-        if (this.mapInstance.fitBounds) {
-          this.mapInstance.fitBounds(paddedBounds);
-        } else {
-          // Fallback: calculate center and zoom
-          const centerLng = (minLng + maxLng) / 2;
-          const centerLat = (minLat + maxLat) / 2;
-          const zoom = Math.max(3, 10 - Math.log2(Math.max(lngDiff, latDiff)));
-          
-          if (this.mapInstance.setCenter) {
-            this.mapInstance.setCenter([centerLng, centerLat]);
-          }
-          if (this.mapInstance.setZoom) {
-            this.mapInstance.setZoom(zoom);
-          }
+        // Use maplibre map if available
+        if (this.mapInstance?.maplibreMap) {
+          const map = this.mapInstance.maplibreMap;
+          map.fitBounds(paddedBounds, { padding: 50 });
         }
       }
     } catch (error) {
