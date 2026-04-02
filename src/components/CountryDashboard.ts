@@ -1,6 +1,7 @@
 /**
  * Country Dashboard Component
- * Provides a searchable country selector with favorites and map/panel integration
+ * Provides a searchable country selector with retractable intelligence panel (slide-out)
+ * matching the main dashboard's CountryDeepDivePanel style
  */
 
 // Country list for search autocomplete
@@ -58,9 +59,9 @@ const COUNTRIES_LIST = [
 
 export class CountryDashboard {
   private container: HTMLElement;
-  private panelsContainer: HTMLElement | null = null;
   private searchInput: HTMLInputElement | null = null;
   private suggestionsContainer: HTMLElement | null = null;
+  private intelligencePanel: HTMLElement | null = null;
   private countryChangeHandler: ((code: string, name: string) => void) | null = null;
 
   constructor(container: HTMLElement, _options: { defaultCountry: string; favoriteCountries: string[] }) {
@@ -68,10 +69,10 @@ export class CountryDashboard {
   }
 
   public render(): void {
-    // Build the complete HTML structure with mobile responsiveness
+    // Build the complete HTML structure with full-screen map and retractable panel
     const html = `
       <div style="display: flex; height: 100vh; background: #000; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; flex-direction: column;">
-        <!-- Header -->
+        <!-- Header with Search -->
         <div style="position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #0a0a0a; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; gap: 16px;">
           <div style="font-size: 16px; font-weight: 600; white-space: nowrap;">Country Dashboard</div>
           <div style="position: relative; flex: 1; max-width: 300px;">
@@ -80,32 +81,101 @@ export class CountryDashboard {
           </div>
         </div>
         
-        <!-- Main Content -->
-        <div style="display: flex; margin-top: 56px; flex: 1; width: 100%; overflow: hidden;">
-          <!-- Map Container -->
-          <div style="flex: 1; display: flex; flex-direction: column; background: #000;">
+        <!-- Main Content Area (Map takes full width) -->
+        <div style="display: flex; margin-top: 56px; flex: 1; width: 100%; overflow: hidden; position: relative;">
+          <!-- Map Container (Full width) -->
+          <div id="country-dashboard-map-container" style="flex: 1; display: flex; flex-direction: column; background: #000; width: 100%; height: 100%;">
             <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">
               Map will be rendered here
             </div>
           </div>
+        </div>
+        
+        <!-- Retractable Intelligence Panel (Slide from right) -->
+        <aside id="country-intelligence-panel" class="country-dashboard-panel" style="
+          position: fixed;
+          top: 56px;
+          right: -460px;
+          width: 430px;
+          height: calc(100vh - 56px);
+          z-index: 5000;
+          border-left: 1px solid #2a2a2a;
+          background: #0a0a0a;
+          box-shadow: -8px 0 32px rgba(0, 0, 0, 0.65);
+          transition: right 0.28s ease;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+        ">
+          <!-- Panel Header -->
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2a2a2a;
+            flex-shrink: 0;
+          ">
+            <div style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 14px;
+              font-weight: 600;
+            ">
+              <span id="panel-country-flag" style="font-size: 20px;">🌍</span>
+              <span id="panel-country-name">Select a country</span>
+            </div>
+            <button id="panel-close-btn" style="
+              background: none;
+              border: none;
+              color: #999;
+              font-size: 24px;
+              cursor: pointer;
+              padding: 0;
+              width: 32px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: color 0.2s;
+            " onmouseover="this.style.color='#e5e5e5'" onmouseout="this.style.color='#999'">×</button>
+          </div>
           
-          <!-- Panels Container -->
-          <div id="panels-container" style="width: 35%; overflow-y: auto; padding: 16px; background: #0a0a0a; border-left: 1px solid #2a2a2a; display: flex; flex-direction: column; gap: 12px;">
-            <div style="padding: 16px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; color: #999; text-align: center; font-size: 13px;">
-              Select a country to view intelligence panels
+          <!-- Panel Content -->
+          <div id="panel-content" style="
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          ">
+            <!-- Intelligence cards will be rendered here -->
+            <div style="
+              padding: 16px;
+              background: #1a1a1a;
+              border: 1px solid #2a2a2a;
+              border-radius: 6px;
+              color: #999;
+              text-align: center;
+              font-size: 13px;
+            ">
+              Select a country to view intelligence
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     `;
 
     this.container.innerHTML = html;
-    this.panelsContainer = this.container.querySelector('#panels-container') as HTMLElement;
     this.searchInput = this.container.querySelector('#country-search') as HTMLInputElement;
     this.suggestionsContainer = this.container.querySelector('#suggestions-container') as HTMLElement;
+    this.intelligencePanel = this.container.querySelector('#country-intelligence-panel') as HTMLElement;
 
-    // Setup search functionality
+    // Setup event listeners
     this.setupSearch();
+    this.setupPanelClose();
   }
 
   private setupSearch(): void {
@@ -145,61 +215,365 @@ export class CountryDashboard {
 
     this.suggestionsContainer.innerHTML = filtered
       .map(country => `
-        <div class="country-suggestion" data-code="${country.code}" data-name="${country.name}" style="padding: 10px 12px; border-bottom: 1px solid #2a2a2a; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: background 0.2s;">
+        <div class="country-suggestion" data-code="${country.code}" data-name="${country.name}" style="
+          padding: 10px 12px;
+          border-bottom: 1px solid #2a2a2a;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          transition: background 0.2s;
+        " onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='transparent'">
           <span style="font-size: 16px;">${country.flag}</span>
           <span>${country.name}</span>
-          <span style="color: #666; margin-left: auto;">${country.code}</span>
+          <span style="margin-left: auto; color: #666; font-size: 11px;">${country.code}</span>
         </div>
       `)
       .join('');
 
     this.suggestionsContainer.style.display = 'block';
 
-    // Add click handlers
+    // Add click handlers to suggestions
     this.suggestionsContainer.querySelectorAll('.country-suggestion').forEach(el => {
-      el.addEventListener('click', () => {
-        const code = el.getAttribute('data-code');
-        const name = el.getAttribute('data-name');
+      el.addEventListener('click', (e) => {
+        const code = (e.currentTarget as HTMLElement).getAttribute('data-code');
+        const name = (e.currentTarget as HTMLElement).getAttribute('data-name');
         if (code && name) {
           this.selectCountry(code, name);
         }
-      });
-
-      el.addEventListener('mouseenter', () => {
-        (el as HTMLElement).style.background = '#2a2a2a';
-      });
-
-      el.addEventListener('mouseleave', () => {
-        (el as HTMLElement).style.background = 'transparent';
       });
     });
   }
 
   private selectCountry(code: string, name: string): void {
     if (this.searchInput) {
-      this.searchInput.value = `${name} (${code})`;
+      this.searchInput.value = name;
     }
     if (this.suggestionsContainer) {
       this.suggestionsContainer.style.display = 'none';
     }
-    if (this.countryChangeHandler) {
-      this.countryChangeHandler(code, name);
+    this.openIntelligencePanel(code, name);
+    this.countryChangeHandler?.(code, name);
+  }
+
+  private openIntelligencePanel(code: string, name: string): void {
+    if (!this.intelligencePanel) return;
+
+    // Update panel header
+    const flagEl = this.container.querySelector('#panel-country-flag') as HTMLElement;
+    const nameEl = this.container.querySelector('#panel-country-name') as HTMLElement;
+    if (flagEl) flagEl.textContent = this.getCountryFlag(code);
+    if (nameEl) nameEl.textContent = name;
+
+    // Slide panel in
+    this.intelligencePanel.style.right = '0';
+
+    // Update panel content with intelligence cards
+    this.updatePanelContent(code, name);
+  }
+
+  private closeintelligencePanel(): void {
+    if (!this.intelligencePanel) return;
+    this.intelligencePanel.style.right = '-460px';
+  }
+
+  private setupPanelClose(): void {
+    const closeBtn = this.container.querySelector('#panel-close-btn') as HTMLButtonElement;
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        this.closeintelligencePanel();
+      });
     }
+  }
+
+  private getCountryFlag(code: string): string {
+    const country = COUNTRIES_LIST.find(c => c.code === code);
+    return country?.flag || '🌍';
+  }
+
+  private updatePanelContent(code: string, name: string): void {
+    const contentEl = this.container.querySelector('#panel-content') as HTMLElement;
+    if (!contentEl) return;
+
+    // Generate mock intelligence data
+    const data = this.generateCountryData(code);
+
+    contentEl.innerHTML = `
+      <!-- Country Overview Card -->
+      <div style="
+        padding: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+      ">
+        <div style="
+          font-size: 12px;
+          color: #999;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          font-weight: 600;
+        ">📍 Country Overview</div>
+        <div style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        ">
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Country</div>
+            <div style="font-size: 14px; font-weight: 600;">${name}</div>
+          </div>
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Code</div>
+            <div style="font-size: 14px; font-weight: 600;">${code}</div>
+          </div>
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Infrastructure</div>
+            <div style="font-size: 14px; font-weight: 600; color: #4ade80;">${data.infrastructure}</div>
+          </div>
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Bases</div>
+            <div style="font-size: 14px; font-weight: 600; color: #f59e0b;">${data.bases}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Country Instability Index Card -->
+      <div style="
+        padding: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+      ">
+        <div style="
+          font-size: 12px;
+          color: #999;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          font-weight: 600;
+        ">⚠️ Country Instability Index</div>
+        <div style="
+          padding: 12px;
+          background: #0a0a0a;
+          border-radius: 4px;
+          border: 1px solid #2a2a2a;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        ">
+          <div style="
+            font-size: 32px;
+            font-weight: 700;
+            color: ${data.ciiColor};
+            min-width: 50px;
+          ">${data.cii}</div>
+          <div>
+            <div style="font-size: 12px; color: #999;">CII Score</div>
+            <div style="font-size: 13px; font-weight: 600; color: #e5e5e5;">${data.ciiLevel}</div>
+            <div style="font-size: 11px; color: #666; margin-top: 2px;">Last updated: Today</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Infrastructure Card -->
+      <div style="
+        padding: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+      ">
+        <div style="
+          font-size: 12px;
+          color: #999;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          font-weight: 600;
+        ">🏗️ Infrastructure</div>
+        <div style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        ">
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Ports</div>
+            <div style="font-size: 16px; font-weight: 700; color: #60a5fa;">${data.ports}</div>
+          </div>
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Cables</div>
+            <div style="font-size: 16px; font-weight: 700; color: #60a5fa;">${data.cables}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Economic Indicators Card -->
+      <div style="
+        padding: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+      ">
+        <div style="
+          font-size: 12px;
+          color: #999;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          font-weight: 600;
+        ">💰 Economic Indicators</div>
+        <div style="
+          padding: 12px;
+          background: #0a0a0a;
+          border-radius: 4px;
+          border: 1px solid #2a2a2a;
+        ">
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+          ">
+            <span style="font-size: 12px; color: #999;">Economic Score</span>
+            <span style="font-size: 14px; font-weight: 700; color: ${data.economicColor};">${data.economic}</span>
+          </div>
+          <div style="font-size: 11px; color: #666;">${data.economicStatus}</div>
+        </div>
+      </div>
+
+      <!-- Military Activity Card -->
+      <div style="
+        padding: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+      ">
+        <div style="
+          font-size: 12px;
+          color: #999;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          font-weight: 600;
+        ">✈️ Military Activity</div>
+        <div style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        ">
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Aircraft</div>
+            <div style="font-size: 16px; font-weight: 700; color: #f59e0b;">${data.aircraft}</div>
+          </div>
+          <div style="
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+          ">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Vessels</div>
+            <div style="font-size: 16px; font-weight: 700; color: #f59e0b;">${data.vessels}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private generateCountryData(code: string): any {
+    // Generate consistent mock data based on country code
+    const seed = code.charCodeAt(0) + code.charCodeAt(1);
+    const random = (min: number, max: number) => Math.floor((seed * 7919 % (max - min + 1)) + min);
+
+    const cii = random(5, 85);
+    let ciiLevel = 'Stable';
+    let ciiColor = '#10b981';
+    if (cii > 60) {
+      ciiLevel = 'Critical';
+      ciiColor = '#dc2626';
+    } else if (cii > 45) {
+      ciiLevel = 'Unstable';
+      ciiColor = '#ef4444';
+    } else if (cii > 30) {
+      ciiLevel = 'Moderate';
+      ciiColor = '#f59e0b';
+    }
+
+    const economic = random(20, 85);
+    let economicColor = '#4ade80';
+    let economicStatus = 'Healthy';
+    if (economic < 40) {
+      economicColor = '#ef4444';
+      economicStatus = 'Concerning';
+    } else if (economic < 60) {
+      economicColor = '#f59e0b';
+      economicStatus = 'Moderate';
+    }
+
+    return {
+      infrastructure: random(30, 120),
+      bases: random(10, 60),
+      cii,
+      ciiLevel,
+      ciiColor,
+      ports: random(5, 40),
+      cables: random(2, 25),
+      economic,
+      economicStatus,
+      economicColor,
+      aircraft: random(50, 500),
+      vessels: random(10, 100),
+    };
   }
 
   public setCountryChangeHandler(handler: (code: string, name: string) => void): void {
     this.countryChangeHandler = handler;
   }
 
-  public setMap(_map: any): void {
-    // Map will be set here for future integration
+  public getMapContainer(): HTMLElement | null {
+    return this.container.querySelector('#country-dashboard-map-container') as HTMLElement;
   }
 
   public getPanelsContainer(): HTMLElement | null {
-    return this.panelsContainer;
+    return this.container.querySelector('#panel-content') as HTMLElement;
   }
 
   public destroy(): void {
+    this.closeintelligencePanel();
     this.container.innerHTML = '';
   }
 }
