@@ -38,6 +38,7 @@ export class CountryDashboard {
   private initializeCountryList(): void {
     try {
       const codes = getAllCountryCodes();
+      console.log('[CountryDashboard] getAllCountryCodes returned:', codes?.length || 0, 'countries');
       if (codes && codes.length > 0) {
         this.allCountries = codes
           .map((code) => ({
@@ -45,13 +46,15 @@ export class CountryDashboard {
             name: getCountryNameByCode(code) || code,
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
+        console.log('[CountryDashboard] Loaded', this.allCountries.length, 'countries from geometry service');
         return;
       }
     } catch (e) {
-      console.warn('Failed to get country codes:', e);
+      console.warn('[CountryDashboard] Failed to get country codes:', e);
     }
 
     // Fallback: use a hardcoded list of major countries
+    console.log('[CountryDashboard] Using hardcoded fallback country list');
     this.allCountries = [
       { code: 'ID', name: 'Indonesia' },
       { code: 'US', name: 'United States' },
@@ -251,6 +254,7 @@ export class CountryDashboard {
   }
 
   public render(): void {
+    console.log('[CountryDashboard] render() called, allCountries:', this.allCountries.length);
     this.container.innerHTML = '';
     this.container.style.cssText = 'display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; background: #0a0a0a;';
     
@@ -261,6 +265,7 @@ export class CountryDashboard {
     setTimeout(() => {
       this.suggestionsDropdown = this.container.querySelector('.country-suggestions-dropdown') as HTMLElement;
       this.searchInput = this.container.querySelector('.country-search-input') as HTMLInputElement;
+      console.log('[CountryDashboard] After setTimeout: dropdown found:', !!this.suggestionsDropdown, 'searchInput found:', !!this.searchInput);
       this.showInitialSuggestions();
     }, 0);
   }
@@ -360,12 +365,18 @@ export class CountryDashboard {
   }
 
   private showInitialSuggestions(): void {
-    if (!this.suggestionsDropdown) return;
+    console.log('[CountryDashboard] showInitialSuggestions() called, dropdown:', !!this.suggestionsDropdown, 'allCountries:', this.allCountries.length);
+    if (!this.suggestionsDropdown) {
+      console.warn('[CountryDashboard] suggestionsDropdown is null!');
+      return;
+    }
     
     if (this.favoriteCountries.size > 0) {
       const favorites = this.allCountries.filter((c) => this.favoriteCountries.has(c.code));
+      console.log('[CountryDashboard] Showing favorites:', favorites.length);
       this.renderSuggestions(favorites);
     } else {
+      console.log('[CountryDashboard] Showing first 20 countries');
       this.renderSuggestions(this.allCountries.slice(0, 20));
     }
     
